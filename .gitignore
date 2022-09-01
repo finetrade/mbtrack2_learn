@@ -1,0 +1,4 @@
+﻿*__pycache__*
+*.ipynb_checkpoints*
+test_*.py
+*.hdf5
