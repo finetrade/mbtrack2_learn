@@ -497,6 +497,7 @@ class CavityResonator():
             # Phasor evolution due to induced voltage by marco-particles during one turn
             sum_val = -2 * sum_tot * self.loss_factor
             self.beam_phasor += sum_val
+            print(self.beam_phasor.real)
         
         # Replace phasor at t=0 (synchronous particle) of the first non empty bunch.
         idx0 = self.valid_bunch_index[0]
