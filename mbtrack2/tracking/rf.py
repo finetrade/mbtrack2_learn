@@ -491,15 +491,13 @@ class CavityResonator():
         sum_tot = np.sum((profile*charge_per_mp) * var)
         
         # Use the formula n_turn times
-        self.beam_phasor_init = np.zeros(n_turn)
         for i in range(n_turn):
             # Phasor decay during one turn
             self.phasor_decay(self.ring.T0, ref_frame="rf")
             # Phasor evolution due to induced voltage by marco-particles during one turn
             sum_val = -2 * sum_tot * self.loss_factor
             self.beam_phasor += sum_val
-            self.beam_phasor_init[i] = self.beam_phasor[0]
-        print(self.beam_phasor_init)
+
         
         # Replace phasor at t=0 (synchronous particle) of the first non empty bunch.
         idx0 = self.valid_bunch_index[0]
