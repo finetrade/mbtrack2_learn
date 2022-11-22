@@ -5,6 +5,7 @@ wake functions.
 """
 
 import warnings
+import pickle
 import pandas as pd
 import numpy as np
 import scipy as sc
@@ -23,7 +24,7 @@ class ComplexData:
     variable : list, numpy array
        contains the function variable values
 
-    function : list or numpy array of complex numbers
+    function : list or numpy array of comp lex numbers
         contains the values taken by the complex function
     """
 
@@ -182,181 +183,18 @@ class ComplexData:
                              y = self.data["imag"], kind=interp_kind)
         return real_func(values) + 1j*imag_func(values)
     
-class WakeFunction(ComplexData):
-    """
-    Define a WakeFunction object based on a ComplexData object.
     
-    Parameters
-    ----------
-    variable : array-like
-        Time domain structure of the wake function in [s].
-    function : array-like
-        Wake function values in [V/C].
-    wake_type : str, optinal
-        Type of the wake function: "long", "xdip", "xquad", ...
-    
-    Attributes
-    ----------
-    data : DataFrame
-    wake_type : str
-    
-    Methods
-    -------
-    from_wakepotential(file_name, bunch_length, bunch_charge, freq_lim)
-        Compute a wake function from a wake potential file and load it to the 
-        WakeFunction object.
-    """
-
-    def __init__(self,
-                 variable=np.array([-1e15, 1e15]),
-                 function=np.array([0, 0]), wake_type='long'):
-        super().__init__(variable, function)
-        self._wake_type = wake_type
-        self.data.index.name = "time [s]"
-        
-    def add(self, structure_to_add, method='zero'):
-        """
-        Method to add two WakeFunction objects. The two structures are
-        compared so that the addition is self-consistent.
-        """
- 
-        if isinstance(structure_to_add, (int, float, complex)):
-            result = super().add(structure_to_add, method=method,
-                                 index_name="time [s]")
-        elif isinstance(structure_to_add, WakeFunction):
-            if (self.wake_type == structure_to_add.wake_type):
-                result = super().add(structure_to_add, method=method,
-                                     index_name="time [s]")
-            else:
-                warnings.warn(('The two WakeFunction objects do not have the '
-                               'same coordinates or plane or type. '
-                               'Returning initial WakeFunction object.'),
-                              UserWarning)
-                result = self
-               
-        wake_to_return = WakeFunction(
-                                result.data.index,
-                                result.data.real.values,
-                                self.wake_type)   
-        return wake_to_return
- 
-    def __radd__(self, structure_to_add):
-        return self.add(structure_to_add)
- 
-    def __add__(self, structure_to_add):
-        return self.add(structure_to_add)
- 
-    def multiply(self, factor):
-        """
-        Multiply a WakeFunction object with a float or an int.
-        If the multiplication is done with something else, throw a warning.
-        """
-        result = super().multiply(factor)
-        wake_to_return = WakeFunction(
-                                result.data.index,
-                                result.data.real.values,
-                                self.wake_type)   
-        return wake_to_return
- 
-    def __mul__(self, factor):
-        return self.multiply(factor)
- 
-    def __rmul__(self, factor):
-        return self.multiply(factor)
-       
-    @property
-    def wake_type(self):
-        return self._wake_type
-   
-    @wake_type.setter
-    def wake_type(self, value):
-        self._wake_type = value
-        
-    def from_wakepotential(self, file_name, bunch_length, bunch_charge, 
-                           freq_lim, nout=None, trim=False):
-        """
-        Compute a wake function from a wake potential file and load it to the 
-        WakeFunction object.
-    
-        Parameters
-        ----------
-        file_name : str
-            Text file that contains wake potential data.
-        bunch_length : float
-            Spatial bunch length in [m].
-        bunch_charge : float
-            Bunch charge in [C].
-        freq_lim : float
-            The maximum frequency for calculating the impedance [Hz].
-        nout : int, optional
-            Length of the transformed axis of the output. If None, it is taken
-            to be 2*(n-1) where n is the length of the input. If nout > n, the
-            input is padded with zeros. If nout < n, the inpu it cropped.
-            Note that, for any nout value, nout//2+1 input points are required.
-        trim : bool or float, optional
-            If True, the pseudo wake function is trimmed at time=0 and is forced 
-            to zero where time<0. 
-            If False, the original result is preserved.
-            If a float is given, the pseudo wake function is trimmed from 
-            time <= trim to 0. 
-    
-        """
-        
-        imp = Impedance()
-        imp.from_wakepotential(file_name=file_name, bunch_length=bunch_length,
-                               bunch_charge=bunch_charge, freq_lim=freq_lim)
-        wf = imp.to_wakefunction(nout=nout, trim=trim)
-        self.__init__(variable=wf.data.index, function=wf.data["real"])
-        
-class Impedance(ComplexData):
-    """
-    Define an Impedance object based on a ComplexData object.
-    
-    Parameters
-    ----------
-    variable : array-like
-        Frequency domain structure of the impedance in [Hz].
-    function : array-like
-        Impedance values in [Ohm].
-    impedance_type : str, optinal
-        Type of the impedance_type: "long", "xdip", "xquad", ...
-    
-    Attributes
-    ----------
-    data : DataFrame
-    impedance_type : str
-    
-    Methods
-    -------
-    from_wakepotential(file_name, bunch_length, bunch_charge, freq_lim)
-        Compute impedance from wake potential data and load it to the Impedance
-        object.
-    loss_factor(sigma)
-        Compute the loss factor or the kick factor for a Gaussian bunch.
-    to_wakefunction()
-        Return a WakeFunction object from the impedance data.
-    """
-
-    def __init__(self,
-                 variable=np.array([-1e15, 1e15]),
-                 function=np.array([0, 0]), impedance_type='long'):
-        super().__init__(variable, function)
-        self._impedance_type = impedance_type
-        self.data.index.name = 'frequency [Hz]'
-        self.initialize_impedance_coefficient()
-
-
-    def initialize_impedance_coefficient(self):
+    def initialize_coefficient(self):
         """
         Define the impedance coefficients and the plane of the impedance that
         are presents in attributes of the class.
         """
-        table = self.impedance_name_and_coefficients_table()
+        table = self.name_and_coefficients_table()
         
         try:
-            component_coefficients = table[self.impedance_type].to_dict()
+            component_coefficients = table[self.component_type].to_dict()
         except KeyError:
-            print('Impedance type {} does not exist'.format(self.impedance_type))
+            print('Component type {} does not exist'.format(self.component_type))
             raise
         
         self.a = component_coefficients["a"]
@@ -365,7 +203,7 @@ class Impedance(ComplexData):
         self.d = component_coefficients["d"]
         self.plane = component_coefficients["plane"]
                     
-    def impedance_name_and_coefficients_table(self):
+    def name_and_coefficients_table(self):
         """
         Return a table associating the human readbale names of an impedance
         component and its associated coefficients and plane.
@@ -386,6 +224,204 @@ class Impedance(ComplexData):
             }
 
         return pd.DataFrame(component_dict)
+    
+    @property
+    def power_x(self):
+        power_x = self.a/2 + self.c/2.
+        if self.plane == 'x':
+            power_x += 1./2.
+        return power_x
+
+    @property
+    def power_y(self):
+        power_y = self.b/2. + self.d/2.
+        if self.plane == 'y':
+            power_y += 1./2.
+        return power_y
+    
+    @property
+    def component_type(self):
+        return self._component_type
+    
+    @component_type.setter
+    def component_type(self, value):
+        self._component_type = value
+        self.initialize_coefficient()
+    
+class WakeFunction(ComplexData):
+    """
+    Define a WakeFunction object based on a ComplexData object.
+    
+    Parameters
+    ----------
+    variable : array-like
+        Time domain structure of the wake function in [s].
+    function : array-like
+        Wake function values in [V/C].
+    component_type : str, optinal
+        Type of the wake function: "long", "xdip", "xquad", ...
+    
+    Attributes
+    ----------
+    data : DataFrame
+    wake_type : str
+    
+    Methods
+    -------
+    from_wakepotential(file_name, bunch_length, bunch_charge, freq_lim)
+        Compute a wake function from a wake potential file and load it to the 
+        WakeFunction object.
+    """
+
+    def __init__(self,
+                 variable=np.array([-1e15, 1e15]),
+                 function=np.array([0, 0]), component_type='long'):
+        super().__init__(variable, function)
+        self._component_type = component_type
+        self.data.index.name = "time [s]"
+        self.initialize_coefficient()
+        
+    def add(self, structure_to_add, method='zero'):
+        """
+        Method to add two WakeFunction objects. The two structures are
+        compared so that the addition is self-consistent.
+        """
+ 
+        if isinstance(structure_to_add, (int, float, complex)):
+            result = super().add(structure_to_add, method=method,
+                                 index_name="time [s]")
+        elif isinstance(structure_to_add, WakeFunction):
+            if (self.component_type == structure_to_add.component_type):
+                result = super().add(structure_to_add, method=method,
+                                     index_name="time [s]")
+            else:
+                warnings.warn(('The two WakeFunction objects do not have the '
+                               'same coordinates or plane or type. '
+                               'Returning initial WakeFunction object.'),
+                              UserWarning)
+                result = self
+               
+        wake_to_return = WakeFunction(
+                                result.data.index,
+                                result.data.real.values,
+                                self.component_type)   
+        return wake_to_return
+ 
+    def __radd__(self, structure_to_add):
+        return self.add(structure_to_add)
+ 
+    def __add__(self, structure_to_add):
+        return self.add(structure_to_add)
+ 
+    def multiply(self, factor):
+        """
+        Multiply a WakeFunction object with a float or an int.
+        If the multiplication is done with something else, throw a warning.
+        """
+        result = super().multiply(factor)
+        wake_to_return = WakeFunction(
+                                result.data.index,
+                                result.data.real.values,
+                                self.component_type)   
+        return wake_to_return
+ 
+    def __mul__(self, factor):
+        return self.multiply(factor)
+ 
+    def __rmul__(self, factor):
+        return self.multiply(factor)
+        
+    def from_wakepotential(self, file_name, bunch_length, bunch_charge, 
+                           freq_lim, component_type="long", divide_by=None, 
+                           nout=None, trim=False, axis0='dist', 
+                           axis0_scale=1e-3, axis1_scale=1e-12):
+        """
+        Compute a wake function from a wake potential file and load it to the 
+        WakeFunction object.
+    
+        Parameters
+        ----------
+        file_name : str
+            Text file that contains wake potential data.
+        bunch_length : float
+            Spatial bunch length in [m].
+        bunch_charge : float
+            Bunch charge in [C].
+        freq_lim : float
+            The maximum frequency for calculating the impedance [Hz].
+        component_type : str, optional
+            Type of the wake: "long", "xdip", "xquad", ...
+        divide_by : float, optional
+            Divide the wake potential by a value. Mainly used to normalize 
+            transverse wake function by displacement.
+        nout : int, optional
+            Length of the transformed axis of the output. If None, it is taken
+            to be 2*(n-1) where n is the length of the input. If nout > n, the
+            input is padded with zeros. If nout < n, the inpu it cropped.
+            Note that, for any nout value, nout//2+1 input points are required.
+        trim : bool or float, optional
+            If True, the pseudo wake function is trimmed at time=0 and is forced 
+            to zero where time<0. 
+            If False, the original result is preserved.
+            If a float is given, the pseudo wake function is trimmed from 
+            time <= trim to 0.
+        axis0 : {'dist', 'time'}, optional
+            Viariable of the data file's first column. Use 'dist' for spacial 
+            distance. Otherwise, 'time' for temporal distance. 
+        axis0_scale : float, optional
+            Scale of the first column with respect to meter if axis0 = 'dist',
+            or to second if axis0 = 'time'.
+        axis1_scale : float, optional
+            Scale of the wake potential (in second column) with respect to V/C.
+    
+        """
+        
+        imp = Impedance()
+        imp.from_wakepotential(file_name=file_name, bunch_length=bunch_length,
+                               bunch_charge=bunch_charge, freq_lim=freq_lim,
+                               component_type=component_type, divide_by=divide_by,
+                               axis0=axis0, axis0_scale=axis0_scale,
+                               axis1_scale=axis1_scale)
+        wf = imp.to_wakefunction(nout=nout, trim=trim)
+        self.__init__(variable=wf.data.index, function=wf.data["real"],
+                      component_type=component_type)
+        
+class Impedance(ComplexData):
+    """
+    Define an Impedance object based on a ComplexData object.
+    
+    Parameters
+    ----------
+    variable : array-like
+        Frequency domain structure of the impedance in [Hz].
+    function : array-like
+        Impedance values in [Ohm].
+    component_type : str, optinal
+        Type of the impedance: "long", "xdip", "xquad", ...
+    
+    Attributes
+    ----------
+    data : DataFrame
+    impedance_type : str
+    
+    Methods
+    -------
+    from_wakepotential(file_name, bunch_length, bunch_charge, freq_lim)
+        Compute impedance from wake potential data and load it to the Impedance
+        object.
+    loss_factor(sigma)
+        Compute the loss factor or the kick factor for a Gaussian bunch.
+    to_wakefunction()
+        Return a WakeFunction object from the impedance data.
+    """
+
+    def __init__(self,
+                 variable=np.array([-1e15, 1e15]),
+                 function=np.array([0, 0]), component_type='long'):
+        super().__init__(variable, function)
+        self._component_type = component_type
+        self.data.index.name = 'frequency [Hz]'
+        self.initialize_coefficient()
 
     def add(self, structure_to_add, beta_x=1, beta_y=1, method='zero'):
         """
@@ -398,7 +434,7 @@ class Impedance(ComplexData):
             result = super().add(structure_to_add, method=method, 
                                  index_name="frequency [Hz]")
         elif isinstance(structure_to_add, Impedance):
-            if (self.impedance_type == structure_to_add.impedance_type):
+            if (self.component_type == structure_to_add.component_type):
                 weight = (beta_x ** self.power_x) * (beta_y ** self.power_y)
                 result = super().add(structure_to_add * weight, method=method, 
                                      index_name="frequency [Hz]")
@@ -412,7 +448,7 @@ class Impedance(ComplexData):
         impedance_to_return = Impedance(
                                 result.data.index,
                                 result.data.real.values + 1j*result.data.imag.values,
-                                self.impedance_type)    
+                                self.component_type)    
         return impedance_to_return
 
     def __radd__(self, structure_to_add):
@@ -430,7 +466,7 @@ class Impedance(ComplexData):
         impedance_to_return = Impedance(
                                 result.data.index,
                                 result.data.real.values + 1j*result.data.imag.values,
-                                self.impedance_type)    
+                                self.component_type)    
         return impedance_to_return
 
     def __mul__(self, factor):
@@ -438,29 +474,6 @@ class Impedance(ComplexData):
 
     def __rmul__(self, factor):
         return self.multiply(factor)
-        
-    @property
-    def impedance_type(self):
-        return self._impedance_type
-    
-    @impedance_type.setter
-    def impedance_type(self, value):
-        self._impedance_type = value
-        self.initialize_impedance_coefficient()
-
-    @property
-    def power_x(self):
-        power_x = self.a/2 + self.c/2.
-        if self.plane == 'x':
-            power_x += 1./2.
-        return power_x
-
-    @property
-    def power_y(self):
-        power_y = self.b/2. + self.d/2.
-        if self.plane == 'y':
-            power_y += 1./2.
-        return power_y
     
     def loss_factor(self, sigma):
         """
@@ -490,13 +503,13 @@ class Impedance(ComplexData):
         from mbtrack2.utilities import spectral_density
         sd = spectral_density(frequency, sigma, m=0)
         
-        if(self.impedance_type == "long"):
+        if(self.component_type == "long"):
             kloss = trapz(x = frequency, 
                           y = 2*self.data["real"][positive_index]*sd)
-        elif(self.impedance_type == "xdip" or self.impedance_type == "ydip"):
+        elif(self.component_type == "xdip" or self.component_type == "ydip"):
             kloss = trapz(x = frequency, 
                           y = 2*self.data["imag"][positive_index]*sd)
-        elif(self.impedance_type == "xquad" or self.impedance_type == "yquad"):
+        elif(self.component_type == "xquad" or self.component_type == "yquad"):
             kloss = trapz(x = frequency, 
                           y = 2*self.data["imag"][positive_index]*sd)
         else:
@@ -505,8 +518,8 @@ class Impedance(ComplexData):
         return kloss
     
     def from_wakepotential(self, file_name, bunch_length, bunch_charge, 
-                           freq_lim, axis0='dist', axis0_scale=1e-3, 
-                           axis1_scale=1e-12):
+                           freq_lim, component_type="long", divide_by=None,
+                           axis0='dist', axis0_scale=1e-3, axis1_scale=1e-12):
         """
         Compute impedance from wake potential data and load it to the Impedance
         object.
@@ -515,12 +528,17 @@ class Impedance(ComplexData):
         ----------
         file_name : str
             Text file that contains wake potential data.
-        freq_lim : float
-            The maximum frequency for calculating the impedance [Hz].
         bunch_length : float
             Electron bunch lenth [m]. 
         bunch_charge : float
             Total bunch charge [C].
+        freq_lim : float
+            The maximum frequency for calculating the impedance [Hz].
+        component_type : str, optional
+            Type of the impedance: "long", "xdip", "xquad", ...
+        divide_by : float, optional
+            Divide the impedance by a value. Mainly used to normalize transverse 
+            impedance by displacement.
         axis0 : {'dist', 'time'}, optional
             Viariable of the data file's first column. Use 'dist' for spacial 
             distance. Otherwise, 'time' for temporal distance. 
@@ -541,6 +559,8 @@ class Impedance(ComplexData):
             raise TypeError('Type of axis 0 not recognized.')
             
         wp = wp0 / axis1_scale
+        if divide_by is not None:
+            wp = wp / divide_by
         
         # FT of wake potential
         sampling = tau[1] - tau[0]
@@ -558,10 +578,15 @@ class Impedance(ComplexData):
         
         dft_rho_trun = np.exp(-0.5*(sigma*2*np.pi*freq_trun)**2 + \
                                   1j*mu*2*np.pi*freq_trun)*bunch_charge
-        imp = dft_wake_trun/dft_rho_trun*-1*bunch_charge
-        
-        super().__init__(variable=freq_trun, function=imp)
-        self.data.index.name = "frequency [Hz]"    
+        if component_type == "long":
+            imp = dft_wake_trun/dft_rho_trun*-1*bunch_charge
+        elif (component_type == "xdip") or (component_type == "ydip"):
+            imp = dft_wake_trun/dft_rho_trun*-1j*bunch_charge
+        else:
+            raise NotImplementedError(component_type + " is not correct.")
+            
+        self.__init__(variable=freq_trun, function=imp, 
+                         component_type=component_type)
         
     def to_wakefunction(self, nout=None, trim=False):
         """
@@ -586,7 +611,7 @@ class Impedance(ComplexData):
         Z0 = (self.data['real'] + self.data['imag']*1j)
         Z = Z0[~np.isnan(Z0)]
         
-        if self.impedance_type != "long":
+        if self.component_type != "long":
             Z = Z / 1j
         
         freq = Z.index
@@ -608,7 +633,8 @@ class Impedance(ComplexData):
             i_neg = np.where(time<trim)[0]
             Wlong[i_neg] = 0
                     
-        wf = WakeFunction(variable=time, function=Wlong)
+        wf = WakeFunction(variable=time, function=Wlong, 
+                          component_type=self.component_type)
         return wf
     
 class WakeField:
@@ -626,7 +652,11 @@ class WakeField:
     Attributes
     ----------
     impedance_components : array of str
-        Impedance component names present for this element.
+        Impedance components present for this element.
+    wake_components : array of str
+        WakeFunction components present for this element.
+    components : array of str
+        Impedance or WakeFunction components present for this element.
         
     Methods
     -------
@@ -638,6 +668,12 @@ class WakeField:
         Add two WakeFields taking into account beta functions.
     add_several_wakefields(wakefields, beta)
         Add a list of WakeFields taking into account beta functions.
+    drop(component)
+        Delete a component or a list of component from the WakeField.
+    save(file)
+        Save WakeField element to file.
+    load(file)
+        Load WakeField element from file.
     """
 
     def __init__(self, structure_list=None, name=None):
@@ -654,14 +690,14 @@ class WakeField:
         """
         list_of_attributes = dir(self)
         if isinstance(structure_to_add, Impedance):
-            attribute_name = "Z" + structure_to_add.impedance_type
+            attribute_name = "Z" + structure_to_add.component_type
             if attribute_name in list_of_attributes:
                 raise ValueError("There is already a component of the type "
                                  "{} in this element.".format(attribute_name))
             else:
                 self.__setattr__(attribute_name, structure_to_add)
         elif isinstance(structure_to_add, WakeFunction):
-            attribute_name = "W" + structure_to_add.wake_type
+            attribute_name = "W" + structure_to_add.component_type
             if attribute_name in list_of_attributes:
                 raise ValueError("There is already a component of the type "
                                  "{} in this element.".format(attribute_name))
@@ -698,6 +734,88 @@ class WakeField:
         valid = ["Wlong", "Wxdip", "Wydip", "Wxquad", "Wyquad"]
         return np.array([comp for comp in dir(self) if comp in valid])
     
+    @property
+    def components(self):
+        """
+        Return an array of the component names for the element.
+        """
+        valid = ["Wlong", "Wxdip", "Wydip", "Wxquad", "Wyquad", 
+                 "Zlong", "Zxdip", "Zydip", "Zxquad", "Zyquad"]
+        return np.array([comp for comp in dir(self) if comp in valid])
+    
+    def drop(self, component):
+        """
+        Delete a component or a list of component from the WakeField.
+
+        Parameters
+        ----------
+        component : str or list of str
+            Component or list of components to drop.
+            If "Z", drop all impedance components.
+            If "W"", drop all wake function components.
+
+        Returns
+        -------
+        None.
+
+        """
+        if component == "Z":
+            component = self.impedance_components
+        elif component == "W":
+            component = self.wake_components
+        
+        if isinstance(component, str):
+            delattr(self, component)
+        elif isinstance(component, list) or isinstance(component, np.ndarray):
+            for comp in component:
+                delattr(self, comp)
+        else:
+            raise TypeError("component should be a str or list of str.")
+            
+    def save(self, file):
+        """
+        Save WakeField element to file.
+        
+        The same pandas version is needed on both saving and loading computer
+        for the pickle to work.
+
+        Parameters
+        ----------
+        file : str
+            File where the WakeField element is saved.
+
+        Returns
+        -------
+        None.
+
+        """
+        with open(file,"wb") as f:
+            pickle.dump(self, f)
+            
+    @staticmethod
+    def load(file):
+        """
+        Load WakeField element from file.
+        
+        The same pandas version is needed on both saving and loading computer
+        for the pickle to work.
+
+        Parameters
+        ----------
+        file : str
+            File where the WakeField element is saved.
+
+        Returns
+        -------
+        wakefield : WakeField
+            Loaded wakefield.
+
+        """
+        with open(file, 'rb') as f:
+            wakefield = pickle.load(f)
+            
+        return wakefield
+    
     @staticmethod
     def add_wakefields(wake1, beta1, wake2, beta2):
         """
@@ -721,22 +839,22 @@ class WakeField:
 
         """
         wake_sum = deepcopy(wake1)
-        for component_name1 in wake1.impedance_components:
-            impedance1 = getattr(wake_sum, component_name1)
-            weight1 = ((beta1[0] ** impedance1.power_x) * 
-                      (beta1[1] ** impedance1.power_y))
-            setattr(wake_sum, component_name1, weight1*impedance1)
+        for component_name1 in wake1.components:
+            comp1 = getattr(wake_sum, component_name1)
+            weight1 = ((beta1[0] ** comp1.power_x) * 
+                      (beta1[1] ** comp1.power_y))
+            setattr(wake_sum, component_name1, weight1*comp1)
             
-        for component_name2 in wake2.impedance_components: 
-            impedance2 = getattr(wake2, component_name2)
-            weight2 = ((beta2[0] ** impedance2.power_x) * 
-                      (beta2[1] ** impedance2.power_y))
+        for component_name2 in wake2.components: 
+            comp2 = getattr(wake2, component_name2)
+            weight2 = ((beta2[0] ** comp2.power_x) * 
+                      (beta2[1] ** comp2.power_y))
             try:
-                impedance1 = getattr(wake_sum, component_name2)
-                setattr(wake_sum, component_name2, impedance1 +
-                        weight2*impedance2)
+                comp1 = getattr(wake_sum, component_name2)
+                setattr(wake_sum, component_name2, comp1 +
+                        weight2*comp2)
             except AttributeError:
-                setattr(wake_sum, component_name2, weight2*impedance2)
+                setattr(wake_sum, component_name2, weight2*comp2)
 
         return wake_sum
     

@@ -19,4 +19,7 @@ from mbtrack2.tracking.aperture import (CircularAperture,
                                         LongitudinalAperture)
 from mbtrack2.tracking.wakepotential import (WakePotential, 
                                              LongRangeResistiveWall)
+                                       
+from mbtrack2.tracking.feedback import (ExponentialDamper,
+                                        FIRDamper)
 from mbtrack2.tracking.monitors import *

@@ -47,8 +47,8 @@ class FreeSpaceCSR(WakeField):
         Zl = self.LongitudinalImpedance(frequency)
         # Wl = self.LongitudinalWakeFunction(time)
         
-        Zlong = Impedance(variable = frequency, function = Zl, impedance_type='long')
-        # Wlong = WakeFunction(variable = time, function = Wl, wake_type="long")
+        Zlong = Impedance(variable = frequency, function = Zl, component_type='long')
+        # Wlong = WakeFunction(variable = time, function = Wl, component_type="long")
         
         super().append_to_model(Zlong)
         # super().append_to_model(Wlong)
@@ -126,8 +126,8 @@ class ParallelPlatesCSR(WakeField):
         Zl = self.LongitudinalImpedance(frequency)
         # Wl = self.LongitudinalWakeFunction(time)
         
-        Zlong = Impedance(variable = frequency, function = Zl, impedance_type='long')
-        # Wlong = WakeFunction(variable = time, function = Wl, wake_type="long")
+        Zlong = Impedance(variable = frequency, function = Zl, component_type='long')
+        # Wlong = WakeFunction(variable = time, function = Wl, component_type="long")
         
         super().append_to_model(Zlong)
         # super().append_to_model(Wlong)

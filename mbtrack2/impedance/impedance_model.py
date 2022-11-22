@@ -5,6 +5,7 @@ Module where the ImpedanceModel class is defined.
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import pickle
 from scipy.integrate import trapz
 from scipy.interpolate import interp1d
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
@@ -61,6 +62,10 @@ class ImpedanceModel(Element):
         Sum all the elements with the same name in the model into sum_name.
     plot_area(Z_type="Zlong", component="real", sigma=None, attr_list=None)
         Plot the contributions of different kind of WakeFields.
+    save(file)
+        Save impedance model to file.
+    load(file)
+        Load impedance model from file.
     """
     
     def __init__(self, ring, wakefield_list=None, wakefiled_positions=None):
@@ -522,3 +527,51 @@ class ImpedanceModel(Element):
             ax.set_ylabel("Power loss [W]")
         
         return pf0, power_loss
+    
+    def save(self, file):
+        """
+        Save impedance model to file.
+        
+        The same pandas version is needed on both saving and loading computer
+        for the pickle to work.
+
+        Parameters
+        ----------
+        file : str
+            File where the impedance model is saved.
+
+        Returns
+        -------
+        None.
+
+        """
+        to_save = {"wakefields":self.wakefields,
+                   "positions":self.positions}
+        with open(file,"wb") as f:
+            pickle.dump(to_save, f)
+    
+    def load(self, file):
+        """
+        Load impedance model from file.
+        
+        The same pandas version is needed on both saving and loading computer
+        for the pickle to work.
+
+        Parameters
+        ----------
+        file : str
+            File where the impedance model is saved.
+
+        Returns
+        -------
+        None.
+
+        """
+        
+        with open(file, 'rb') as f:
+            to_load = pickle.load(f)
+            
+        self.wakefields = to_load["wakefields"]
+        self.positions = to_load["positions"]  
+        self.sum_elements()
+        self.sum_by_name_all()

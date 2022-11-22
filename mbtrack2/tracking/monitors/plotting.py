@@ -71,7 +71,7 @@ def plot_beamdata(filenames, dataset="mean", dimension="tau", stat_var="mean",
                 axis = dimension_dict[dimension]
                 label = ["$\\epsilon_{x}$ (m.rad)",
                          "$\\epsilon_{y}$ (m.rad)",
-                         "$\\epsilon_{s}$ (m.rad)"]
+                         "$\\epsilon_{s}$ (s)"]
                 if stat_var == "mean":
                     y = np.nanmean(data[axis,bunch_index,:],0)
                 elif stat_var == "std":
@@ -119,7 +119,7 @@ def plot_beamdata(filenames, dataset="mean", dimension="tau", stat_var="mean",
                 axis = dimension_dict[dimension]
                 label = ["$\\epsilon_{x}$ (m.rad)",
                          "$\\epsilon_{y}$ (m.rad)",
-                         "$\\epsilon_{s}$ (m.rad)"]
+                         "$\\epsilon_{s}$ (s)"]
                 y = data[axis,:,idx]
                 y_label = label[axis]
             elif dataset == "cs_invariant":
@@ -197,7 +197,7 @@ def streak_beamdata(filename, dataset="mean", dimension="tau", cm_lim=None):
         axis = dimension_dict[dimension]
         label = ["$\\epsilon_{x}$ (m.rad)",
                  "$\\epsilon_{y}$ (m.rad)",
-                 "$\\epsilon_{s}$ (m.rad)"]
+                 "$\\epsilon_{s}$ (s)"]
         z = np.array(data["emit"][axis,:,:]).T
         z_label = label[axis]
         title = z_label
@@ -296,11 +296,11 @@ def plot_bunchdata(filenames, bunch_number, dataset, dimension="x",
         elif dataset == "emit":
             dimension_dict = {"x":0, "y":1, "s":2}
                              
-            y_var = file[group][dataset][dimension_dict[dimension]]*1e9
+            y_var = file[group][dataset][dimension_dict[dimension]]
             
-            if dimension == "x": label = "hor. emittance (nm.rad)"
-            elif dimension == "y": label = "ver. emittance (nm.rad)"
-            elif dimension == "s": label = "long. emittance (nm.rad)"
+            if dimension == "x": label = "hor. emittance (m.rad)"
+            elif dimension == "y": label = "ver. emittance (m.rad)"
+            elif dimension == "s": label = "long. emittance (s)"
             
             
         elif dataset == "mean" or dataset == "std":                        
@@ -383,7 +383,7 @@ def plot_phasespacedata(filename, bunch_number, x_var, y_var, turn,
              "$\\delta$"]
     
     # find the index of "turn" in time array
-    turn_index = np.where(file["PhaseSpaceData_0"]["time"][:]==turn) 
+    turn_index = np.where(file[group]["time"][:]==turn) 
     
     if len(turn_index[0]) == 0:
         raise ValueError("Turn {0} is not found. Enter turn from {1}.".

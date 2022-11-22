@@ -68,19 +68,19 @@ def effective_impedance(ring, imp, m, mu, sigma, M, tuneS, xi=None,
     
     p = np.arange(pmin,pmax+1)
     
-    if imp.impedance_type == "long":
+    if imp.component_type == "long":
         fp = ring.f0*(p*M + mu + m*tuneS)
         fp = fp[np.nonzero(fp)] # Avoid division by 0
         num = np.sum( imp(fp) * h(fp) / (fp*2*np.pi) )
         den = np.sum( h(fp) )
         Zeff = num/den
         
-    elif imp.impedance_type == "xdip" or imp.impedance_type == "ydip":
-        if imp.impedance_type == "xdip":
+    elif imp.component_type == "xdip" or imp.component_type == "ydip":
+        if imp.component_type == "xdip":
             tuneXY = ring.tune[0]
             if xi is None :
                 xi = ring.chro[0]
-        elif imp.impedance_type == "ydip":
+        elif imp.component_type == "ydip":
             tuneXY = ring.tune[1]
             if xi is None:
                 xi = ring.chro[1]
@@ -214,7 +214,7 @@ def double_sided_impedance(impedance):
         negative_index = impedance.data.index*-1
         negative_data = impedance.data.set_index(negative_index)
         
-        imp_type = impedance.impedance_type
+        imp_type = impedance.component_type
         
         if imp_type == "long":
             negative_data["imag"] = -1*negative_data["imag"]

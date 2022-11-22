@@ -59,21 +59,21 @@ class Resonator(WakeField):
             if dim == "long":
                 Zlong = Impedance(variable=frequency, 
                                 function=self.long_impedance(frequency),
-                                impedance_type="long")
+                                component_type="long")
                 super().append_to_model(Zlong)
                 Wlong = WakeFunction(variable=time,
                                     function=self.long_wake_function(time, atol),
-                                    wake_type="long")
+                                    component_type="long")
                 super().append_to_model(Wlong)
                 
             elif dim == "x" or dim == "y":
                 Zdip = Impedance(variable=frequency, 
                                 function=self.transverse_impedance(frequency),
-                                impedance_type=dim + "dip")
+                                component_type=dim + "dip")
                 super().append_to_model(Zdip)
                 Wdip = WakeFunction(variable=time,
                                     function=self.transverse_wake_function(time),
-                                    wake_type=dim + "dip")
+                                    component_type=dim + "dip")
                 super().append_to_model(Wdip)
             else:
                 raise ValueError("Plane must be: long, x or y")
@@ -137,7 +137,7 @@ class PureInductive(WakeField):
         freq = np.linspace(start=1, stop=self.imp_freq_lim, num=self.n_imp)
         imp = Impedance(variable=freq, 
                         function=self.long_impedance(freq),
-                        impedance_type="long")
+                        component_type="long")
         super().append_to_model(imp)
         
         wf = imp.to_wakefunction(nout=nout, trim=trim)
@@ -173,7 +173,7 @@ class PureResistive(WakeField):
         freq = np.linspace(start=1, stop=self.imp_freq_lim, num=self.n_imp)
         imp = Impedance(variable=freq, 
                         function=self.long_impedance(freq),
-                        impedance_type="long")
+                        component_type="long")
         super().append_to_model(imp)
         
         wf = imp.to_wakefunction(nout=nout, trim=trim)

@@ -94,12 +94,12 @@ class CircularResistiveWall(WakeField):
         Wl = self.LongitudinalWakeFunction(time, exact, atol)
         Wt = self.TransverseWakeFunction(time, exact)
         
-        Zlong = Impedance(variable = frequency, function = Z1, impedance_type='long')
-        Zxdip = Impedance(variable = frequency, function = Z2, impedance_type='xdip')
-        Zydip = Impedance(variable = frequency, function = Z2, impedance_type='ydip')
-        Wlong = WakeFunction(variable = time, function = Wl, wake_type="long")
-        Wxdip = WakeFunction(variable = time, function = Wt, wake_type="xdip")
-        Wydip = WakeFunction(variable = time, function = Wt, wake_type="ydip")
+        Zlong = Impedance(variable = frequency, function = Z1, component_type='long')
+        Zxdip = Impedance(variable = frequency, function = Z2, component_type='xdip')
+        Zydip = Impedance(variable = frequency, function = Z2, component_type='ydip')
+        Wlong = WakeFunction(variable = time, function = Wl, component_type="long")
+        Wxdip = WakeFunction(variable = time, function = Wt, component_type="xdip")
+        Wydip = WakeFunction(variable = time, function = Wt, component_type="ydip")
         
         super().append_to_model(Zlong)
         super().append_to_model(Zxdip)
@@ -280,9 +280,9 @@ class Coating(WakeField):
         Zl = self.LongitudinalImpedance(frequency, approx)
         Zt = self.TransverseImpedance(frequency, approx)
         
-        Zlong = Impedance(variable = frequency, function = Zl, impedance_type='long')
-        Zxdip = Impedance(variable = frequency, function = Zt, impedance_type='xdip')
-        Zydip = Impedance(variable = frequency, function = Zt, impedance_type='ydip')
+        Zlong = Impedance(variable = frequency, function = Zl, component_type='long')
+        Zxdip = Impedance(variable = frequency, function = Zt, component_type='xdip')
+        Zydip = Impedance(variable = frequency, function = Zt, component_type='ydip')
         
         super().append_to_model(Zlong)
         super().append_to_model(Zxdip)

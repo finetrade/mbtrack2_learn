@@ -36,11 +36,11 @@ class StupakovRectangularTaper(WakeField):
         self.m_max = m_max
         self.n_points = n_points
 
-        Zlong = Impedance(variable = frequency, function = self.long(), impedance_type='long')
-        Zxdip = Impedance(variable = frequency, function = self.xdip(), impedance_type='xdip')
-        Zydip = Impedance(variable = frequency, function = self.ydip(), impedance_type='ydip')
-        Zxquad = Impedance(variable = frequency, function = -1*self.quad(), impedance_type='xquad')
-        Zyquad = Impedance(variable = frequency, function = self.quad(), impedance_type='yquad')
+        Zlong = Impedance(variable = frequency, function = self.long(), component_type='long')
+        Zxdip = Impedance(variable = frequency, function = self.xdip(), component_type='xdip')
+        Zydip = Impedance(variable = frequency, function = self.ydip(), component_type='ydip')
+        Zxquad = Impedance(variable = frequency, function = -1*self.quad(), component_type='xquad')
+        Zyquad = Impedance(variable = frequency, function = self.quad(), component_type='yquad')
         
         super().append_to_model(Zlong)
         super().append_to_model(Zxdip)
@@ -160,9 +160,9 @@ class StupakovCircularTaper(WakeField):
         self.m_max = m_max
         self.n_points = n_points
 
-        Zlong = Impedance(variable = frequency, function = self.long(), impedance_type='long')
-        Zxdip = Impedance(variable = frequency, function = self.dip(), impedance_type='xdip')
-        Zydip = Impedance(variable = frequency, function = self.dip(), impedance_type='ydip')
+        Zlong = Impedance(variable = frequency, function = self.long(), component_type='long')
+        Zxdip = Impedance(variable = frequency, function = self.dip(), component_type='xdip')
+        Zydip = Impedance(variable = frequency, function = self.dip(), component_type='ydip')
         
         super().append_to_model(Zlong)
         super().append_to_model(Zxdip)

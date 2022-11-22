@@ -497,7 +497,6 @@ class CavityResonator():
             # Phasor evolution due to induced voltage by marco-particles during one turn
             sum_val = -2 * sum_tot * self.loss_factor
             self.beam_phasor += sum_val
-
         
         # Replace phasor at t=0 (synchronous particle) of the first non empty bunch.
         idx0 = self.valid_bunch_index[0]
@@ -579,6 +578,11 @@ class CavityResonator():
     @Rs.setter
     def Rs(self, value):
         self.Rs_per_cavity = value / self.Ncav
+        
+    @property
+    def RL(self):
+        """Loaded shunt impedance [ohm]"""
+        return self.Rs / (1 + self.beta)
 
     @property
     def Q(self):
@@ -730,7 +734,7 @@ class CavityResonator():
     
     def Z(self, f):
         """Cavity impedance in [Ohm] for a given frequency f in [Hz]"""
-        return self.Rs/(1 + 1j*self.QL*(self.fr/f - f/self.fr))
+        return self.RL/(1 + 1j*self.QL*(self.fr/f - f/self.fr))
     
     def set_optimal_detune(self, I0):
         """

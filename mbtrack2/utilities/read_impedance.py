@@ -10,7 +10,7 @@ from pathlib import Path
 from scipy.constants import c
 from mbtrack2.impedance.wakefield import Impedance, WakeFunction, WakeField
 
-def read_CST(file, impedance_type='long', divide_by=None):
+def read_CST(file, component_type='long', divide_by=None):
     """
     Read CST file format into an Impedance object.
     
@@ -18,7 +18,7 @@ def read_CST(file, impedance_type='long', divide_by=None):
     ----------
     file : str
         Path to the file to read.
-    impedance_type : str, optional
+    component_type : str, optional
         Type of the Impedance object.
     divide_by : float, optional
         Divide the impedance by a value. Mainly used to normalize transverse 
@@ -35,12 +35,12 @@ def read_CST(file, impedance_type='long', divide_by=None):
     if divide_by is not None:
         df["Real"] = df["Real"]/divide_by
         df["Imaginary"] = df["Imaginary"]/divide_by
-    if impedance_type == "long":
+    if component_type == "long":
         df["Real"] = np.abs(df["Real"])
     df.set_index("Frequency", inplace = True)
     result = Impedance(variable = df.index,
                        function = df["Real"] + 1j*df["Imaginary"],
-                       impedance_type=impedance_type)
+                       component_type=component_type)
     return result
 
 def read_IW2D(file, file_type='Zlong'):
@@ -60,16 +60,16 @@ def read_IW2D(file, file_type='Zlong'):
         Data from file.
     """
     if file_type[0] == "Z":
-        df = pd.read_csv(file, sep = ' ', header = None, 
+        df = pd.read_csv(file, delim_whitespace=True, header = None, 
                          names = ["Frequency","Real","Imaginary"], skiprows=1)
         df.set_index("Frequency", inplace = True)
         df = df[df["Real"].notna()]
         df = df[df["Imaginary"].notna()]
         result = Impedance(variable = df.index,
                            function = df["Real"] + 1j*df["Imaginary"],
-                           impedance_type=file_type[1:])
+                           component_type=file_type[1:])
     elif file_type[0] == "W":
-        df = pd.read_csv(file, sep = ' ', header = None, 
+        df = pd.read_csv(file, delim_whitespace=True, header = None, 
                          names = ["Distance","Wake"], skiprows=1)
         df["Time"] = df["Distance"] / c
         df.set_index("Time", inplace = True)
@@ -82,7 +82,7 @@ def read_IW2D(file, file_type='Zlong'):
         #     df["Wake"] = df["Wake"]*-1
         result = WakeFunction(variable = df.index,
                            function = df["Wake"],
-                           wake_type=file_type[1:])
+                           component_type=file_type[1:])
     else:
         raise ValueError("file_type should begin by Z or W.")
     return result
