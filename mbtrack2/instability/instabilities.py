@@ -266,12 +266,12 @@ def lcbi_stability_diagram(ring, I, Vrf, M, modes, cavity_list, detune_range):
         cav = cavity_list[-1]
         for i, det in enumerate(detune_range):
             gr = lcbi_growth_rate_mode(ring, I=I, Vrf=Vrf, mu=mu, fr=cav.m*ring.f1 + det, RL=cav.RL, QL=cav.QL, M=M)
-            Rth[i] = (1/ring.tau[2] - fixed_gr) * cav.Rs / gr
+            Rth[i] = (1/ring.tau[2] - fixed_gr) * cav.RL / gr
 
         ax.plot(detune_range*1e-3, Rth*1e-6, label="$\mu$ = " + str(int(mu)))
     
     plt.xlabel(r"$\Delta f$ [kHz]")
-    plt.ylabel(r"$R_{s,max}$ $[M\Omega]$")
+    plt.ylabel(r"$R_{L,max}$ $[M\Omega]$")
     plt.yscale("log")
     plt.legend()
         
