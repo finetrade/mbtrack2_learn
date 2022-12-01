@@ -89,7 +89,7 @@ def cbi_threshold(ring, I, Vrf, f, beta, Ncav=1):
     
     return (Zlong, Zxdip, Zydip)
 
-def lcbi_growth_rate_mode(ring, I, Vrf, M, mu, fr=None, RL=None, QL=None, Z=None):
+def lcbi_growth_rate_mode(ring, I, Vrf, M, mu, fr=None, RL=None, QL=None, Z=None, S=None):
     """
     Compute the longitudinal coupled bunch instability growth rate driven by
     an impedance for a given coupled bunch mode mu [1].
@@ -161,14 +161,14 @@ def lcbi_growth_rate_mode(ring, I, Vrf, M, mu, fr=None, RL=None, QL=None, Z=None
         
     n0 = np.arange(n_max)
     n1 = np.arange(1, n_max)
-    omega_p = ring.omega0 * (n0 * M + mu + nu_s)
-    omega_m = ring.omega0 * (n1 * M - mu - nu_s)
+    omega_p = ring.omega0 * (n0 * M + S * mu + nu_s)
+    omega_m = ring.omega0 * (n1 * M - S * mu - nu_s)
         
     sum_val = np.sum(omega_p*Zr(omega_p)) - np.sum(omega_m*Zr(omega_m))
 
     return factor * sum_val
     
-def lcbi_growth_rate(ring, I, Vrf, M, fr=None, RL=None, QL=None, Z=None):
+def lcbi_growth_rate(ring, I, Vrf, M, fr=None, RL=None, QL=None, Z=None, S=None):
     """
     Compute the maximum growth rate for longitudinal coupled bunch instability 
     driven an impedance [1].
@@ -212,7 +212,7 @@ def lcbi_growth_rate(ring, I, Vrf, M, fr=None, RL=None, QL=None, Z=None):
     """
     growth_rates = np.zeros(M)
     for i in range(M):
-        growth_rates[i] = lcbi_growth_rate_mode(ring, I, Vrf, M, i, fr=fr, RL=RL, QL=QL, Z=Z)
+        growth_rates[i] = lcbi_growth_rate_mode(ring, I, Vrf, M, i, fr=fr, RL=RL, QL=QL, Z=Z, S=S)
     
     growth_rate = np.max(growth_rates)
     mu = np.argmax(growth_rates)
@@ -261,11 +261,11 @@ def lcbi_stability_diagram(ring, I, Vrf, M, modes, cavity_list, detune_range):
     for mu in modes:
         fixed_gr = 0
         for cav in cavity_list[:-1]:
-            fixed_gr += lcbi_growth_rate_mode(ring, I=I, Vrf=Vrf, mu=mu, fr=cav.fr, RL=cav.RL, QL=cav.QL, M=M)
+            fixed_gr += lcbi_growth_rate_mode(ring, I=I, Vrf=Vrf, mu=mu, fr=cav.fr, RL=cav.RL, QL=cav.QL, M=M, S=S)
         
         cav = cavity_list[-1]
         for i, det in enumerate(detune_range):
-            gr = lcbi_growth_rate_mode(ring, I=I, Vrf=Vrf, mu=mu, fr=cav.m*ring.f1 + det, RL=cav.RL, QL=cav.QL, M=M)
+            gr = lcbi_growth_rate_mode(ring, I=I, Vrf=Vrf, mu=mu, fr=cav.m*ring.f1 + det, RL=cav.RL, QL=cav.QL, M=M, S=S)
             Rth[i] = (1/ring.tau[2] - fixed_gr) * cav.RL / gr
 
         ax.plot(detune_range*1e-3, Rth*1e-6, label="$\mu$ = " + str(int(mu)))
