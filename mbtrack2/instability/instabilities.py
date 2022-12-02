@@ -89,7 +89,7 @@ def cbi_threshold(ring, I, Vrf, f, beta, Ncav=1):
     
     return (Zlong, Zxdip, Zydip)
 
-def lcbi_growth_rate_mode(ring, I, Vrf, M, mu, fr=None, RL=None, QL=None, Z=None, S=None):
+def lcbi_growth_rate_mode(ring, I, Vrf, M, mu, fr=None, RL=None, QL=None, Z=None, S=None, P=None):
     """
     Compute the longitudinal coupled bunch instability growth rate driven by
     an impedance for a given coupled bunch mode mu [1].
@@ -163,12 +163,14 @@ def lcbi_growth_rate_mode(ring, I, Vrf, M, mu, fr=None, RL=None, QL=None, Z=None
     n1 = np.arange(1, n_max)
     omega_p = ring.omega0 * (n0 * M + S * mu + nu_s)
     omega_m = ring.omega0 * (n1 * M - S * mu - nu_s)
-    sigma_t = 6e-2/(3.0e8)    
-    sum_val = np.sum(omega_p*np.exp(-omega_p*omega_p*sigma_t*sigma_t)*Zr(omega_p)) - np.sum(omega_m*np.exp(-omega_m*omega_m*sigma_t*sigma_t)*Zr(omega_m))
-    #sum_val = np.sum(omega_p*Zr(omega_p)) - np.sum(omega_m*Zr(omega_m))
+    if P:
+        sigma_t = ring.sigma_0    
+        sum_val = np.sum(omega_p*np.exp(-omega_p*omega_p*sigma_t*sigma_t)*Zr(omega_p)) - np.sum(omega_m*np.exp(-omega_m*omega_m*sigma_t*sigma_t)*Zr(omega_m))
+    else:
+        sum_val = np.sum(omega_p*Zr(omega_p)) - np.sum(omega_m*Zr(omega_m))
     return factor * sum_val
     
-def lcbi_growth_rate(ring, I, Vrf, M, fr=None, RL=None, QL=None, Z=None, S=None):
+def lcbi_growth_rate(ring, I, Vrf, M, fr=None, RL=None, QL=None, Z=None, S=None, P=None):
     """
     Compute the maximum growth rate for longitudinal coupled bunch instability 
     driven an impedance [1].
@@ -212,7 +214,7 @@ def lcbi_growth_rate(ring, I, Vrf, M, fr=None, RL=None, QL=None, Z=None, S=None)
     """
     growth_rates = np.zeros(M)
     for i in range(M):
-        growth_rates[i] = lcbi_growth_rate_mode(ring, I, Vrf, M, i, fr=fr, RL=RL, QL=QL, Z=Z, S=S)
+        growth_rates[i] = lcbi_growth_rate_mode(ring, I, Vrf, M, i, fr=fr, RL=RL, QL=QL, Z=Z, S=S, P=P)
     
     growth_rate = np.max(growth_rates)
     mu = np.argmax(growth_rates)
