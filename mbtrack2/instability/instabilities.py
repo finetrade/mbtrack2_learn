@@ -163,9 +163,9 @@ def lcbi_growth_rate_mode(ring, I, Vrf, M, mu, fr=None, RL=None, QL=None, Z=None
     n1 = np.arange(1, n_max)
     omega_p = ring.omega0 * (n0 * M + S * mu + nu_s)
     omega_m = ring.omega0 * (n1 * M - S * mu - nu_s)
-        
-    sum_val = np.sum(omega_p*Zr(omega_p)) - np.sum(omega_m*Zr(omega_m))
-
+    sigma_t = 6e-2/(3.0e8)    
+    sum_val = np.sum(omega_p*np.exp(-omega_p*omega_p*sigma_t*sigma_t)*Zr(omega_p)) - np.sum(omega_m*np.exp(-omega_m*omega_m*sigma_t*sigma_t)*Zr(omega_m))
+    #sum_val = np.sum(omega_p*Zr(omega_p)) - np.sum(omega_m*Zr(omega_m))
     return factor * sum_val
     
 def lcbi_growth_rate(ring, I, Vrf, M, fr=None, RL=None, QL=None, Z=None, S=None):
