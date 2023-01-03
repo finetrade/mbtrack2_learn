@@ -295,11 +295,12 @@ class CavityResonator():
                         
                         ind = (sorted_index == i)
                         phase = self.m * self.ring.omega1 * (center0 + self.ring.T1* (index + self.ring.h * self.nturn))
+                        phase = self.m * self.ring.omega1 * bunch["tau"]                     
                         #Vgene = self.Vg*np.cos(phase + self.theta_g)
                         Vgene = self.Vc*np.cos(phase + self.theta)                        
                         Vbeam = np.real(self.beam_phasor)
                         Vtot = Vgene + Vbeam - charge_per_mp*self.loss_factor*mp_per_bin
-                        print('index', index , 'i = ', i, 'center0 =', center0, 'ind = ', ind, 'Cavity = ',self.Ncav, 'Vgene = ', Vgene, 'Vbeam =', Vbeam, 'VBeamL = ', charge_per_mp*self.loss_factor*mp_per_bin)
+                        print('index', index , 'i = ', i, 'center0 =', center0, 'ind len = ', len(ind), 'Cavity = ',self.Ncav, 'Vgene = ', Vgene, 'Vbeam =', Vbeam, 'VBeamL = ', charge_per_mp*self.loss_factor*mp_per_bin)
                         energy_change[ind] = Vtot / self.ring.E0
     
                         self.beam_phasor -= 2*charge_per_mp*self.loss_factor*mp_per_bin
@@ -310,6 +311,7 @@ class CavityResonator():
                 
                 if index == self.bunch_index:
                     # apply kick
+                    print('energy_change =' , energy_change)
                     bunch["delta"] += energy_change
             
             # save beam phasor value
