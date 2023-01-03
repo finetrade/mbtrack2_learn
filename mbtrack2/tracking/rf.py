@@ -300,6 +300,7 @@ class CavityResonator():
                         Vgene = self.Vc*np.cos(phase + self.theta)                        
                         Vbeam = np.real(self.beam_phasor)
                         Vtot = Vgene + Vbeam - charge_per_mp*self.loss_factor*mp_per_bin
+                        print('phase', phase)
                         #print('index', index , 'i = ', i, 'center0 =', center0, 'ind length = ', len(ind), 'Cavity = ',self.Ncav, 'Vgene = ', Vgene, 'Vbeam =', Vbeam, 'VBeamL = ', charge_per_mp*self.loss_factor*mp_per_bin)
                         energy_change[ind] = Vtot / self.ring.E0
     
