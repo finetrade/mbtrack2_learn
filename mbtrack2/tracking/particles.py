@@ -320,9 +320,9 @@ class Bunch:
 
         """
         bin_min = self[dimension].min()
-        bin_min = min(bin_min*0.99, bin_min*1.01)
+        bin_min = min(bin_min*0.999, bin_min*1.001)
         bin_max = self[dimension].max()
-        bin_max = max(bin_max*0.99, bin_max*1.01)
+        bin_max = max(bin_max*0.999, bin_max*1.001)
         
         bins = np.linspace(bin_min, bin_max, n_bin)
         center = (bins[1:] + bins[:-1])/2
