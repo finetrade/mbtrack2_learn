@@ -311,7 +311,7 @@ class CavityResonator():
                 self.phasor_decay(-1 * (center[-1] + bin_length/2), ref_frame="beam")
                 
                 if index == self.bunch_index:
-                    # apply kick
+                    # apply kick for each bunch
                     bunch["delta"] += energy_change
             
             # save beam phasor value
