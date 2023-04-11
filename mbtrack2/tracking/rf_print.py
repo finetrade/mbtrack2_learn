@@ -325,7 +325,57 @@ class CavityResonator():
                 
         self.nturn += 1
                 
-           
+        
+    def init_phasor_track(self, beam):
+        """
+        Initialize the beam phasor for a given beam distribution using a
+        tracking like method.
+        
+        Follow the same steps as the track method but in the "rf" reference 
+        frame and without any modifications on the beam.
+
+        Parameters
+        ----------
+        beam : Beam object
+
+        """        
+        if self.tracking is False:
+            self.init_tracking(beam)
+            
+        n_turn = int(self.filling_time/ring.T0*10)
+        
+        for i in range(n_turn):
+            for j, bunch in enumerate(beam.not_empty):
+                
+                index = self.valid_bunch_index[j]
+                
+                if beam.mpi_switch:
+                    # get shared bunch profile for current bunch
+                    center = beam.mpi.tau_center[j]
+                    profile = beam.mpi.tau_profile[j]
+                    bin_length = center[1]-center[0]
+                    charge_per_mp = beam.mpi.charge_per_mp_all[j]
+                else:
+                    if i == 0:
+                        # get bunch profile for current bunch
+                        (bins, sorted_index, profile, center) = bunch.binning(n_bin=self.n_bin)
+                        if j == 0:
+                            self.profile_save = np.zeros((len(beam),len(profile),))
+                            self.center_save = np.zeros((len(beam),len(center),))
+                        self.profile_save[j,:] = profile
+                        self.center_save[j,:] = center
+                    else:
+                        profile = self.profile_save[j,:]
+                        center = self.center_save[j,:]
+                        
+                    bin_length = center[1]-center[0]
+                    charge_per_mp = bunch.charge_per_mp
+                
+                self.phasor_decay(center[0] - bin_length/2, ref_frame="rf")
+                self.phasor_evol(profile, bin_length, charge_per_mp, ref_frame="rf")
+                self.phasor_decay(-1 * (center[-1] + bin_length/2), ref_frame="rf")
+                self.phasor_decay( (self.distance[index] * ring.T1), ref_frame="rf")
+            
     def phasor_decay(self, time, ref_frame="beam"):
         """
         Compute the beam phasor decay during a given time span, assuming that 

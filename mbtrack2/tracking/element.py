@@ -76,7 +76,7 @@ class LongitudinalMap(Element):
     """
     
     def __init__(self, ring):
-        self.ring = ring
+        ring = ring
         
     @Element.parallel
     def track(self, bunch):
@@ -89,9 +89,38 @@ class LongitudinalMap(Element):
         ----------
         bunch : Bunch or Beam object
         """
-        bunch["delta"] -= self.ring.U0 / self.ring.E0
-        bunch["tau"] += self.ring.ac * self.ring.T0 * bunch["delta"]
+        bunch["delta"] -= ring.U0 / ring.E0
+        bunch["tau"] += ring.ac * ring.T0 * bunch["delta"]
 
+    def to_gpu(self, recursive=True):
+        '''
+        Transfer all necessary arrays to the GPU
+        '''
+        # Check if to_gpu has been invoked already
+        if hasattr(self, '_device') and self._device == 'GPU':
+            return
+
+        assert bm.device == 'GPU'
+        import cupy as cp
+        bunch = cp.asarray(bunch)
+
+        # to make sure it will not be called again
+        self._device = 'GPU'
+
+    def to_cpu(self, recursive=True):
+        '''
+        Transfer all necessary arrays back to the CPU
+        '''
+        # Check if to_cpu has been invoked already
+        if hasattr(self, '_device') and self._device == 'CPU':
+            return
+
+        assert bm.device == 'CPU'
+        import cupy as cp
+        bunch = cp.asnumpy(bunch)
+
+        self._device = 'CPU'
+  
 class SynchrotronRadiation(Element):
     """
     Element to handle synchrotron radiation, radiation damping and quantum 
@@ -105,7 +134,7 @@ class SynchrotronRadiation(Element):
     """
     
     def __init__(self, ring, switch = np.ones((3,), dtype=bool)):
-        self.ring = ring
+        ring = ring
         self.switch = switch
         
     @Element.parallel        
@@ -121,19 +150,50 @@ class SynchrotronRadiation(Element):
         """
         if (self.switch[0] == True):
             rand = np.random.normal(size=len(bunch))
-            bunch["delta"] = ((1 - 2*self.ring.T0/self.ring.tau[2])*bunch["delta"] +
-                 2*self.ring.sigma_delta*(self.ring.T0/self.ring.tau[2])**0.5*rand)
+            bunch["delta"] = ((1 - 2*ring.T0/ring.tau[2])*bunch["delta"] +
+                 2*ring.sigma_delta*(ring.T0/ring.tau[2])**0.5*rand)
             
         if (self.switch[1] == True):
             rand = np.random.normal(size=len(bunch))
-            bunch["xp"] = ((1 - 2*self.ring.T0/self.ring.tau[0])*bunch["xp"] +
-                 2*self.ring.sigma()[1]*(self.ring.T0/self.ring.tau[0])**0.5*rand)
+            bunch["xp"] = ((1 - 2*ring.T0/ring.tau[0])*bunch["xp"] +
+                 2*ring.sigma()[1]*(ring.T0/ring.tau[0])**0.5*rand)
        
         if (self.switch[2] == True):
             rand = np.random.normal(size=len(bunch))
-            bunch["yp"] = ((1 - 2*self.ring.T0/self.ring.tau[1])*bunch["yp"] +
-                 2*self.ring.sigma()[3]*(self.ring.T0/self.ring.tau[1])**0.5*rand)
+            bunch["yp"] = ((1 - 2*ring.T0/ring.tau[1])*bunch["yp"] +
+                 2*ring.sigma()[3]*(ring.T0/ring.tau[1])**0.5*rand)
+
+    def to_gpu(self, recursive=True):
+        '''
+        Transfer all necessary arrays to the GPU
+        '''
+        # Check if to_gpu has been invoked already
+        if hasattr(self, '_device') and self._device == 'GPU':
+            return
+
+        assert bm.device == 'GPU'
+        import cupy as cp
+        bunch = cp.asarray(bunch)
+        self.switch = cp.asarray(self.switch)
         
+
+        # to make sure it will not be called again
+        self._device = 'GPU'
+
+    def to_cpu(self, recursive=True):
+        '''
+        Transfer all necessary arrays back to the CPU
+        '''
+        # Check if to_cpu has been invoked already
+        if hasattr(self, '_device') and self._device == 'CPU':
+            return
+
+        assert bm.device == 'CPU'
+        import cupy as cp
+        bunch = cp.asnumpy(bunch)
+
+        self._device = 'CPU'
+         
 class TransverseMap(Element):
     """
     Transverse map for a single turn in the synchrotron.
@@ -144,16 +204,16 @@ class TransverseMap(Element):
     """
     
     def __init__(self, ring):
-        self.ring = ring
-        self.alpha = self.ring.optics.local_alpha
-        self.beta = self.ring.optics.local_beta
-        self.gamma = self.ring.optics.local_gamma
-        self.dispersion = self.ring.optics.local_dispersion        
-        if self.ring.adts is not None:
-            self.adts_poly = [np.poly1d(self.ring.adts[0]),
-                              np.poly1d(self.ring.adts[1]),
-                              np.poly1d(self.ring.adts[2]), 
-                              np.poly1d(self.ring.adts[3])]
+        ring = ring
+        self.alpha = ring.optics.local_alpha
+        self.beta = ring.optics.local_beta
+        self.gamma = ring.optics.local_gamma
+        self.dispersion = ring.optics.local_dispersion        
+        if ring.adts is not None:
+            self.adts_poly = [np.poly1d(ring.adts[0]),
+                              np.poly1d(ring.adts[1]),
+                              np.poly1d(ring.adts[2]), 
+                              np.poly1d(ring.adts[3])]
     
     @Element.parallel    
     def track(self, bunch):
@@ -168,18 +228,18 @@ class TransverseMap(Element):
         """
 
         # Compute phase advance which depends on energy via chromaticity and ADTS
-        if self.ring.adts is None:
-            phase_advance_x = 2*np.pi * (self.ring.tune[0] + 
-                                         self.ring.chro[0]*bunch["delta"])
-            phase_advance_y = 2*np.pi * (self.ring.tune[1] + 
-                                         self.ring.chro[1]*bunch["delta"])
+        if ring.adts is None:
+            phase_advance_x = 2*np.pi * (ring.tune[0] + 
+                                         ring.chro[0]*bunch["delta"])
+            phase_advance_y = 2*np.pi * (ring.tune[1] + 
+                                         ring.chro[1]*bunch["delta"])
         else:
-            phase_advance_x = 2*np.pi * (self.ring.tune[0] + 
-                                         self.ring.chro[0]*bunch["delta"] + 
+            phase_advance_x = 2*np.pi * (ring.tune[0] + 
+                                         ring.chro[0]*bunch["delta"] + 
                                          self.adts_poly[0](bunch['x']) + 
                                          self.adts_poly[2](bunch['y']))
-            phase_advance_y = 2*np.pi * (self.ring.tune[1] + 
-                                         self.ring.chro[1]*bunch["delta"] +
+            phase_advance_y = 2*np.pi * (ring.tune[1] + 
+                                         ring.chro[1]*bunch["delta"] +
                                          self.adts_poly[1](bunch['x']) + 
                                          self.adts_poly[3](bunch['y']))
         
