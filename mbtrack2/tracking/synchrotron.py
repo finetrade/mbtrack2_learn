@@ -5,7 +5,6 @@ Module where the Synchrotron class is defined.
 
 import numpy as np
 from scipy.constants import c, e
-from ..utilities import bmath as bm
         
 class Synchrotron:
     """
