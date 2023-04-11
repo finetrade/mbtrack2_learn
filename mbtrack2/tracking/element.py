@@ -9,7 +9,6 @@ import numpy as np
 from abc import ABCMeta, abstractmethod
 from functools import wraps
 from mbtrack2.tracking.particles import Beam
-from ..utilities import bmath as bm
 
 class Element(metaclass=ABCMeta):
     """
