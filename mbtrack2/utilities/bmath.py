@@ -17,7 +17,7 @@ __exec_mode = 'single_node'
 
 __gpu_dev = None
 
-# dictionary stoself.ring the CPU versions of the desired functions #
+# dictionary storing the CPU versions of the desired functions #
 _CPU_func_dict = {
     'rfft': np.fft.rfft,
     'irfft': np.fft.irfft,

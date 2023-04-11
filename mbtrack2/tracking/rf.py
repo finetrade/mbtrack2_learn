@@ -16,7 +16,7 @@ class RFCavity(Element):
     
     Parameters
     ----------
-    self.ring : Synchrotron object
+    ring : Synchrotron object
     m : int
         Harmonic number of the cavity
     Vc : float
@@ -24,8 +24,8 @@ class RFCavity(Element):
     theta : float
         Phase of Cavity voltage
     """
-    def __init__(self, self.ring, m, Vc, theta):
-        self.ring = self.ring
+    def __init__(self, ring, m, Vc, theta):
+        self.ring = ring
         self.m = m 
         self.Vc = Vc
         self.theta = theta
@@ -60,7 +60,7 @@ class CavityResonator():
     
     Parameters
     ----------
-    self.ring : Synchrotron object
+    ring : Synchrotron object
     m : int or float
         Harmonic number of the cavity.
     Rs : float
@@ -164,9 +164,9 @@ class CavityResonator():
     track(beam)
         Tracking method.
     phasor_decay(time)
-        Compute the beam phasor decay duself.ring a given time span.
+        Compute the beam phasor decay during a given time span.
     phasor_evol(profile, bin_length, charge_per_mp)
-        Compute the beam phasor evolution duself.ring the crossing of a bunch.
+        Compute the beam phasor evolution during the crossing of a bunch.
     VRF(z, I0)
         Return the total RF voltage.
     dVRF(z, I0)
@@ -178,17 +178,17 @@ class CavityResonator():
     
     References
     ----------
-    [1] Wilson, P. B. (1994). Fundamental-mode rf design in e+ e− storage self.ring 
-    factories. In Frontiers of Particle Beams: Factories with e+ e-self.rings 
-    (pp. 293-311). Spself.ringer, Berlin, Heidelberg.
+    [1] Wilson, P. B. (1994). Fundamental-mode rf design in e+ e− storage ring 
+    factories. In Frontiers of Particle Beams: Factories with e+ e-Rings 
+    (pp. 293-311). Springer, Berlin, Heidelberg.
     
     [2] Yamamoto, Naoto, Alexis Gamelin, and Ryutaro Nagaoka. "Investigation 
     of Longitudinal Beam Dynamics With Harmonic Cavities by Using the Code 
     Mbtrack." IPAC’19, Melbourne, Australia, 2019.
     """
-    def __init__(self, self.ring, m, Rs, Q, QL, detune, Ncav=1, Vc=0, theta=0, 
+    def __init__(self, ring, m, Rs, Q, QL, detune, Ncav=1, Vc=0, theta=0, 
                  n_bin=75):
-        self.ring = self.ring
+        self.ring = ring
         self.m = m
         self.Ncav = Ncav
         if Ncav != 1:
@@ -328,14 +328,14 @@ class CavityResonator():
            
     def phasor_decay(self, time, ref_frame="beam"):
         """
-        Compute the beam phasor decay duself.ring a given time span, assuming that 
-        no particles are crossing the cavity duself.ring the time span.
+        Compute the beam phasor decay during a given time span, assuming that 
+        no particles are crossing the cavity during the time span.
 
         Parameters
         ----------
         time : float
             Time span in [s], can be positive or negative.
-        ref_frame : stself.ring, optional
+        ref_frame : string, optional
             Reference frame to be used, can be "beam" or "rf".
 
         """
@@ -348,7 +348,7 @@ class CavityResonator():
         
     def phasor_evol(self, profile, bin_length, charge_per_mp, ref_frame="beam"):
         """
-        Compute the beam phasor evolution duself.ring the crossing of a bunch using 
+        Compute the beam phasor evolution during the crossing of a bunch using 
         an analytic formula [1].
         
         Assume that the phasor decay happens before the beam loading.
@@ -361,7 +361,7 @@ class CavityResonator():
             Length of a bin in [s].
         charge_per_mp : float
             Charge per macro-particle in [C].
-        ref_frame : stself.ring, optional
+        ref_frame : string, optional
             Reference frame to be used, can be "beam" or "rf".
             
         References
@@ -376,7 +376,7 @@ class CavityResonator():
             
         n_bin = len(profile)
         
-        # Phasor decay duself.ring crossing time
+        # Phasor decay during crossing time
         deltaT = n_bin*bin_length
         self.phasor_decay(deltaT, ref_frame)
         
@@ -449,9 +449,9 @@ class CavityResonator():
         
         # Use the formula n_turn times
         for i in range(n_turn):
-            # Phasor decay duself.ring one turn
+            # Phasor decay during one turn
             self.phasor_decay(self.ring.T0, ref_frame="rf")
-            # Phasor evolution due to induced voltage by marco-particles duself.ring one turn
+            # Phasor evolution due to induced voltage by marco-particles during one turn
             sum_val = -2 * sum_tot * self.loss_factor
             self.beam_phasor += sum_val
         

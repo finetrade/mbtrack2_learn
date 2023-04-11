@@ -72,11 +72,11 @@ class LongitudinalMap(Element):
     
     Parameters
     ----------
-    self.ring : Synchrotron object
+    ring : Synchrotron object
     """
     
-    def __init__(self, self.ring):
-        self.ring = self.ring
+    def __init__(self, ring):
+        self.ring = ring
         
     @Element.parallel
     def track(self, bunch):
@@ -128,13 +128,13 @@ class SynchrotronRadiation(Element):
     
     Parameters
     ----------
-    self.ring : Synchrotron object
+    ring : Synchrotron object
     switch : bool array of shape (3,), optional
         allow to choose on which plane the synchrotron radiation is active
     """
     
-    def __init__(self, self.ring, switch = np.ones((3,), dtype=bool)):
-        self.ring = self.ring
+    def __init__(self, ring, switch = np.ones((3,), dtype=bool)):
+        self.ring = ring
         self.switch = switch
         
     @Element.parallel        
@@ -200,10 +200,10 @@ class TransverseMap(Element):
     
     Parameters
     ----------
-    self.ring : Synchrotron object
+    ring : Synchrotron object
     """
     
-    def __init__(self, self.ring):
+    def __init__(self, ring):
         self.ring = self.ring
         self.alpha = self.ring.optics.local_alpha
         self.beta = self.ring.optics.local_beta
