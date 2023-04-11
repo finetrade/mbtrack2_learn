@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 from scipy.constants import c, m_e, m_p, e
+from mbtrack2.utilities import bmath as bm
 
 class Particle:
     """
