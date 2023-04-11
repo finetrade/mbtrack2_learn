@@ -46,7 +46,7 @@ class Bunch:
     
     Parameters
     ----------
-    ring : Synchrotron object
+    self.ring : Synchrotron object
     mp_number : float, optional
         Macro-particle number.
     current : float, optional
@@ -92,13 +92,13 @@ class Bunch:
     References
     ----------
     [1] Wiedemann, H. (2015). Particle accelerator physics. 4th edition. 
-    Springer, Eq.(8.39) of p224.
+    Spself.ringer, Eq.(8.39) of p224.
     """
     
-    def __init__(self, ring, mp_number=1e3, current=1e-3, track_alive=True,
+    def __init__(self, self.ring, mp_number=1e3, current=1e-3, track_alive=True,
                  alive=True):
         
-        self.ring = ring
+        self.self.ring = self.ring
         if not alive:
             mp_number = 1
             current = 0
@@ -153,7 +153,7 @@ class Bunch:
     @mp_number.setter
     def mp_number(self, value):
         self._mp_number = int(value)
-        self.__init__(self.ring, value, self.charge)
+        self.__init__(self.self.ring, value, self.charge)
         
     @property
     def charge_per_mp(self):
@@ -176,20 +176,20 @@ class Bunch:
     @property
     def particle_number(self):
         """Particle number"""
-        return int(self.charge / np.abs(self.ring.particle.charge))
+        return int(self.charge / np.abs(self.self.ring.particle.charge))
     
     @particle_number.setter
     def particle_number(self, value):
-        self.charge_per_mp = value * self.ring.particle.charge / self.__len__()
+        self.charge_per_mp = value * self.self.ring.particle.charge / self.__len__()
         
     @property
     def current(self):
         """Bunch current [A]"""
-        return self.charge / self.ring.T0
+        return self.charge / self.self.ring.T0
     
     @current.setter
     def current(self, value):
-        self.charge_per_mp = value * self.ring.T0 / self.__len__()
+        self.charge_per_mp = value * self.self.ring.T0 / self.__len__()
         
     @property
     def is_empty(self):
@@ -232,12 +232,12 @@ class Bunch:
         Return the average Courant-Snyder invariant of each plane.
 
         """
-        Jx = (self.ring.optics.local_gamma[0] * self['x']**2) + \
-              (2*self.ring.optics.local_alpha[0] * self['x'])*self['xp'] + \
-              (self.ring.optics.local_beta[0] * self['xp']**2)
-        Jy = (self.ring.optics.local_gamma[1] * self['y']**2) + \
-              (2*self.ring.optics.local_alpha[1] * self['y']*self['yp']) + \
-              (self.ring.optics.local_beta[1] * self['yp']**2)
+        Jx = (self.self.ring.optics.local_gamma[0] * self['x']**2) + \
+              (2*self.self.ring.optics.local_alpha[0] * self['x'])*self['xp'] + \
+              (self.self.ring.optics.local_beta[0] * self['xp']**2)
+        Jy = (self.self.ring.optics.local_gamma[1] * self['y']**2) + \
+              (2*self.self.ring.optics.local_alpha[1] * self['y']*self['yp']) + \
+              (self.self.ring.optics.local_beta[1] * self['yp']**2)
         return np.array((np.mean(Jx),np.mean(Jy)))
         
     def init_gaussian(self, cov=None, mean=None, **kwargs):
@@ -256,7 +256,7 @@ class Bunch:
         References
         ----------
         [1] Wiedemann, H. (2015). Particle accelerator physics. 4th 
-        edition. Springer, Eq.(8.38) of p223.
+        edition. Spself.ringer, Eq.(8.38) of p223.
         [2] http://www.pp.rhul.ac.uk/bdsim/manual-develop/dev_beamgeneration.html
 
         """
@@ -264,27 +264,27 @@ class Bunch:
             mean = np.zeros((6,))
         
         if cov is None:
-            sigma_0 = kwargs.get("sigma_0", self.ring.sigma_0)
-            sigma_delta = kwargs.get("sigma_delta", self.ring.sigma_delta)
-            optics = kwargs.get("optics", self.ring.optics)
+            sigma_0 = kwargs.get("sigma_0", self.self.ring.sigma_0)
+            sigma_delta = kwargs.get("sigma_delta", self.self.ring.sigma_delta)
+            optics = kwargs.get("optics", self.self.ring.optics)
             
             cov = np.zeros((6,6))
-            cov[0,0] = self.ring.emit[0]*optics.local_beta[0] + (optics.local_dispersion[0]*self.ring.sigma_delta)**2
-            cov[1,1] = self.ring.emit[0]*optics.local_gamma[0] + (optics.local_dispersion[1]*self.ring.sigma_delta)**2
-            cov[0,1] = -1*self.ring.emit[0]*optics.local_alpha[0] + (optics.local_dispersion[0]*optics.local_dispersion[1]*self.ring.sigma_delta**2)
-            cov[1,0] = -1*self.ring.emit[0]*optics.local_alpha[0] + (optics.local_dispersion[0]*optics.local_dispersion[1]*self.ring.sigma_delta**2)
-            cov[0,5] = optics.local_dispersion[0]*self.ring.sigma_delta**2
-            cov[5,0] = optics.local_dispersion[0]*self.ring.sigma_delta**2
-            cov[1,5] = optics.local_dispersion[1]*self.ring.sigma_delta**2
-            cov[5,1] = optics.local_dispersion[1]*self.ring.sigma_delta**2
-            cov[2,2] = self.ring.emit[1]*optics.local_beta[1] + (optics.local_dispersion[2]*self.ring.sigma_delta)**2
-            cov[3,3] = self.ring.emit[1]*optics.local_gamma[1] + (optics.local_dispersion[3]*self.ring.sigma_delta)**2
-            cov[2,3] = -1*self.ring.emit[1]*optics.local_alpha[1] + (optics.local_dispersion[2]*optics.local_dispersion[3]*self.ring.sigma_delta**2)
-            cov[3,2] = -1*self.ring.emit[1]*optics.local_alpha[1] + (optics.local_dispersion[2]*optics.local_dispersion[3]*self.ring.sigma_delta**2)
-            cov[2,5] = optics.local_dispersion[2]*self.ring.sigma_delta**2
-            cov[5,2] = optics.local_dispersion[2]*self.ring.sigma_delta**2
-            cov[3,5] = optics.local_dispersion[3]*self.ring.sigma_delta**2
-            cov[5,3] = optics.local_dispersion[3]*self.ring.sigma_delta**2
+            cov[0,0] = self.self.ring.emit[0]*optics.local_beta[0] + (optics.local_dispersion[0]*self.self.ring.sigma_delta)**2
+            cov[1,1] = self.self.ring.emit[0]*optics.local_gamma[0] + (optics.local_dispersion[1]*self.self.ring.sigma_delta)**2
+            cov[0,1] = -1*self.self.ring.emit[0]*optics.local_alpha[0] + (optics.local_dispersion[0]*optics.local_dispersion[1]*self.self.ring.sigma_delta**2)
+            cov[1,0] = -1*self.self.ring.emit[0]*optics.local_alpha[0] + (optics.local_dispersion[0]*optics.local_dispersion[1]*self.self.ring.sigma_delta**2)
+            cov[0,5] = optics.local_dispersion[0]*self.self.ring.sigma_delta**2
+            cov[5,0] = optics.local_dispersion[0]*self.self.ring.sigma_delta**2
+            cov[1,5] = optics.local_dispersion[1]*self.self.ring.sigma_delta**2
+            cov[5,1] = optics.local_dispersion[1]*self.self.ring.sigma_delta**2
+            cov[2,2] = self.self.ring.emit[1]*optics.local_beta[1] + (optics.local_dispersion[2]*self.self.ring.sigma_delta)**2
+            cov[3,3] = self.self.ring.emit[1]*optics.local_gamma[1] + (optics.local_dispersion[3]*self.self.ring.sigma_delta)**2
+            cov[2,3] = -1*self.self.ring.emit[1]*optics.local_alpha[1] + (optics.local_dispersion[2]*optics.local_dispersion[3]*self.self.ring.sigma_delta**2)
+            cov[3,2] = -1*self.self.ring.emit[1]*optics.local_alpha[1] + (optics.local_dispersion[2]*optics.local_dispersion[3]*self.self.ring.sigma_delta**2)
+            cov[2,5] = optics.local_dispersion[2]*self.self.ring.sigma_delta**2
+            cov[5,2] = optics.local_dispersion[2]*self.self.ring.sigma_delta**2
+            cov[3,5] = optics.local_dispersion[3]*self.self.ring.sigma_delta**2
+            cov[5,3] = optics.local_dispersion[3]*self.self.ring.sigma_delta**2
             cov[4,4] = sigma_0**2
             cov[5,5] = sigma_delta**2
             
@@ -398,7 +398,7 @@ class Beam:
     
     Parameters
     ----------
-    ring : Synchrotron object
+    self.ring : Synchrotron object
     bunch_list : list of Bunch object, optional
 
     Attributes
@@ -409,19 +409,19 @@ class Beam:
         Total bunch charge in [C]
     particle_number : int
         Total number of particle in the beam
-    filling_pattern : bool array of shape (ring.h,)
+    filling_pattern : bool array of shape (self.ring.h,)
         Filling pattern of the beam
-    bunch_current : array of shape (ring.h,)
+    bunch_current : array of shape (self.ring.h,)
         Current in each bunch in [A]
-    bunch_charge : array of shape (ring.h,)
+    bunch_charge : array of shape (self.ring.h,)
         Charge in each bunch in [C]
-    bunch_particle : array of shape (ring.h,)
+    bunch_particle : array of shape (self.ring.h,)
         Particle number in each bunch
-    bunch_mean : array of shape (6, ring.h)
+    bunch_mean : array of shape (6, self.ring.h)
         Mean position of alive particles for each bunch
-    bunch_std : array of shape (6, ring.h)
+    bunch_std : array of shape (6, self.ring.h)
         Standard deviation of the position of alive particles for each bunch        
-    bunch_emit : array of shape (6, ring.h)
+    bunch_emit : array of shape (6, self.ring.h)
         Bunch emittance of alive particles for each bunch
     mpi : Mpi object
     mpi_switch : bool
@@ -449,15 +449,15 @@ class Beam:
         Plot variables with respect to bunch number.
     """
     
-    def __init__(self, ring, bunch_list=None):
-        self.ring = ring
+    def __init__(self, self.ring, bunch_list=None):
+        self.self.ring = self.ring
         self.mpi_switch = False
         if bunch_list is None:
-            self.init_beam(np.zeros((self.ring.h,1),dtype=bool))
+            self.init_beam(np.zeros((self.self.ring.h,1),dtype=bool))
         else:
-            if (len(bunch_list) != self.ring.h):
+            if (len(bunch_list) != self.self.ring.h):
                 raise ValueError(("The length of the bunch list is {} ".format(len(bunch_list)) + 
-                                  "but should be {}".format(self.ring.h)))
+                                  "but should be {}".format(self.self.ring.h)))
             self.bunch_list = bunch_list
             
     def __len__(self):
@@ -491,7 +491,7 @@ class Beam:
     @property
     def distance_between_bunches(self):
         """Return an array which contains the distance to the next bunch in 
-        units of the RF period (ring.T1)"""
+        units of the RF period (self.ring.T1)"""
         return self._distance_between_bunches
     
     def update_distance_between_bunches(self):
@@ -538,7 +538,7 @@ class Beam:
         
         Parameters
         ----------
-        filling_pattern : numpy array or list of length ring.h
+        filling_pattern : numpy array or list of length self.ring.h
             Filling pattern of the beam, can be a list or an array of bool, 
             then current_per_bunch is used. Or can be an array with the current
             in each bunch.
@@ -555,9 +555,9 @@ class Beam:
             other bunches are initialized with a single marco-particle.
         """
         
-        if (len(filling_pattern) != self.ring.h):
+        if (len(filling_pattern) != self.self.ring.h):
             raise ValueError(("The length of filling pattern is {} ".format(len(filling_pattern)) + 
-                              "but should be {}".format(self.ring.h)))
+                              "but should be {}".format(self.self.ring.h)))
         
         if mpi is True:
             mp_per_bunch_mpi = mp_per_bunch
@@ -568,17 +568,17 @@ class Beam:
         if filling_pattern.dtype == np.dtype("bool"):
             for value in filling_pattern:
                 if value == True:
-                    bunch_list.append(Bunch(self.ring, mp_per_bunch, 
+                    bunch_list.append(Bunch(self.self.ring, mp_per_bunch, 
                                             current_per_bunch, track_alive))
                 elif value == False:
-                    bunch_list.append(Bunch(self.ring, alive=False))
+                    bunch_list.append(Bunch(self.self.ring, alive=False))
         elif filling_pattern.dtype == np.dtype("float64"):
             for current in filling_pattern:
                 if current != 0:
-                    bunch_list.append(Bunch(self.ring, mp_per_bunch, 
+                    bunch_list.append(Bunch(self.self.ring, mp_per_bunch, 
                                             current, track_alive))
                 elif current == 0:
-                    bunch_list.append(Bunch(self.ring, alive=False))
+                    bunch_list.append(Bunch(self.self.ring, alive=False))
         else:
             raise TypeError("{} should be bool or float64".format(filling_pattern.dtype))
                 
@@ -589,7 +589,7 @@ class Beam:
         if mpi is True:
             self.mpi_init()
             current = self[self.mpi.rank_to_bunch(self.mpi.rank)].current
-            bunch =  Bunch(self.ring, mp_per_bunch_mpi, current, track_alive)
+            bunch =  Bunch(self.self.ring, mp_per_bunch_mpi, current, track_alive)
             bunch.init_gaussian()
             self[self.mpi.rank_to_bunch(self.mpi.rank)] = bunch
         else:
@@ -653,7 +653,7 @@ class Beam:
     def bunch_mean(self):
         """Return an array with the mean position of alive particles for each
         bunches"""
-        bunch_mean = np.zeros((6,self.ring.h))
+        bunch_mean = np.zeros((6,self.self.ring.h))
         for idx, bunch in enumerate(self.not_empty):
             index = self.bunch_index[idx]
             bunch_mean[:,index] = bunch.mean
@@ -663,7 +663,7 @@ class Beam:
     def bunch_std(self):
         """Return an array with the standard deviation of the position of alive 
         particles for each bunches"""
-        bunch_std = np.zeros((6,self.ring.h))
+        bunch_std = np.zeros((6,self.self.ring.h))
         for idx, bunch in enumerate(self.not_empty):
             index = self.bunch_index[idx]
             bunch_std[:,index] = bunch.std
@@ -673,7 +673,7 @@ class Beam:
     def bunch_emit(self):
         """Return an array with the bunch emittance of alive particles for each
         bunches and each plane"""
-        bunch_emit = np.zeros((3,self.ring.h))
+        bunch_emit = np.zeros((3,self.self.ring.h))
         for idx, bunch in enumerate(self.not_empty):
             index = self.bunch_index[idx]
             bunch_emit[:,index] = bunch.emit
@@ -683,7 +683,7 @@ class Beam:
     def bunch_cs(self):
         """Return an array with the average Courant-Snyder invariant for each 
         bunch"""
-        bunch_cs = np.zeros((2,self.ring.h))
+        bunch_cs = np.zeros((2,self.self.ring.h))
         for idx, bunch in enumerate(self.not_empty):
             index = self.bunch_index[idx]
             bunch_cs[:,index] = bunch.cs_invariant

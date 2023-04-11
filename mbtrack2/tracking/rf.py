@@ -16,7 +16,7 @@ class RFCavity(Element):
     
     Parameters
     ----------
-    ring : Synchrotron object
+    self.ring : Synchrotron object
     m : int
         Harmonic number of the cavity
     Vc : float
@@ -24,8 +24,8 @@ class RFCavity(Element):
     theta : float
         Phase of Cavity voltage
     """
-    def __init__(self, ring, m, Vc, theta):
-        ring = ring
+    def __init__(self, self.ring, m, Vc, theta):
+        self.ring = self.ring
         self.m = m 
         self.Vc = Vc
         self.theta = theta
@@ -41,12 +41,12 @@ class RFCavity(Element):
         ----------
         bunch : Bunch or Beam object
         """
-        bunch["delta"] += self.Vc / ring.E0 * np.cos(
-                self.m * ring.omega1 * bunch["tau"] + self.theta )
+        bunch["delta"] += self.Vc / self.ring.E0 * np.cos(
+                self.m * self.ring.omega1 * bunch["tau"] + self.theta )
         
     def value(self, val):
-        return self.Vc / ring.E0 * np.cos( 
-                self.m * ring.omega1 * val + self.theta )
+        return self.Vc / self.ring.E0 * np.cos( 
+                self.m * self.ring.omega1 * val + self.theta )
     
     
 class CavityResonator():
@@ -60,7 +60,7 @@ class CavityResonator():
     
     Parameters
     ----------
-    ring : Synchrotron object
+    self.ring : Synchrotron object
     m : int or float
         Harmonic number of the cavity.
     Rs : float
@@ -72,7 +72,7 @@ class CavityResonator():
     QL : float
         Loaded quality factor of the cavity.
     detune : float
-        Detuing of the cavity in [Hz], defined as (fr - m*ring.f1).
+        Detuing of the cavity in [Hz], defined as (fr - m*self.ring.f1).
     Ncav : int, optional
         Number of cavities.
     Vc : float, optinal
@@ -164,9 +164,9 @@ class CavityResonator():
     track(beam)
         Tracking method.
     phasor_decay(time)
-        Compute the beam phasor decay during a given time span.
+        Compute the beam phasor decay duself.ring a given time span.
     phasor_evol(profile, bin_length, charge_per_mp)
-        Compute the beam phasor evolution during the crossing of a bunch.
+        Compute the beam phasor evolution duself.ring the crossing of a bunch.
     VRF(z, I0)
         Return the total RF voltage.
     dVRF(z, I0)
@@ -178,17 +178,17 @@ class CavityResonator():
     
     References
     ----------
-    [1] Wilson, P. B. (1994). Fundamental-mode rf design in e+ e− storage ring 
-    factories. In Frontiers of Particle Beams: Factories with e+ e-Rings 
-    (pp. 293-311). Springer, Berlin, Heidelberg.
+    [1] Wilson, P. B. (1994). Fundamental-mode rf design in e+ e− storage self.ring 
+    factories. In Frontiers of Particle Beams: Factories with e+ e-self.rings 
+    (pp. 293-311). Spself.ringer, Berlin, Heidelberg.
     
     [2] Yamamoto, Naoto, Alexis Gamelin, and Ryutaro Nagaoka. "Investigation 
     of Longitudinal Beam Dynamics With Harmonic Cavities by Using the Code 
     Mbtrack." IPAC’19, Melbourne, Australia, 2019.
     """
-    def __init__(self, ring, m, Rs, Q, QL, detune, Ncav=1, Vc=0, theta=0, 
+    def __init__(self, self.ring, m, Rs, Q, QL, detune, Ncav=1, Vc=0, theta=0, 
                  n_bin=75):
-        ring = ring
+        self.ring = self.ring
         self.m = m
         self.Ncav = Ncav
         if Ncav != 1:
@@ -201,7 +201,7 @@ class CavityResonator():
         self.Vc = Vc
         self.theta = theta
         self.beam_phasor = np.zeros(1, dtype=np.complex)
-        self.beam_phasor_record = np.zeros((ring.h), dtype=np.complex)
+        self.beam_phasor_record = np.zeros((self.ring.h), dtype=np.complex)
         self.tracking = False
         self.Vg = 0
         self.theta_g = 0
@@ -274,7 +274,7 @@ class CavityResonator():
                         # save beam phasor value
                         self.beam_phasor_record[index] = self.beam_phasor
                         # phasor decay to be at t=0 of the next bunch
-                        self.phasor_decay(ring.T1, ref_frame="beam")
+                        self.phasor_decay(self.ring.T1, ref_frame="beam")
                         continue
                 
                 energy_change = bunch["tau"]*0
@@ -294,18 +294,18 @@ class CavityResonator():
                             continue
                         
                         ind = (sorted_index == i)
-                        #phase = self.m * ring.omega1 * (center0 + ring.T1* (index + ring.h * self.nturn))
+                        #phase = self.m * self.ring.omega1 * (center0 + self.ring.T1* (index + self.ring.h * self.nturn))
                         #Vgene = self.Vg*np.cos(phase + self.theta_g)
                         #Vbeam = np.real(self.beam_phasor)
                         #Vtot = Vgene + Vbeam - charge_per_mp*self.loss_factor*mp_per_bin 
                         
                         # omega1 = 7560 * omega0
-                        # ring.T1 = ring.T0/7560
-                        phase = self.m * self.wr * (center0 + ring.T1* (index))                                              
+                        # self.ring.T1 = self.ring.T0/7560
+                        phase = self.m * self.wr * (center0 + self.ring.T1* (index))                                              
                         Vcav = self.Vc*np.cos(phase + self.theta)                        
                         Vbeam = np.real(self.beam_phasor)
                         Vtot = Vcav + Vbeam - charge_per_mp*self.loss_factor*mp_per_bin
-                        energy_change[ind] = Vtot / ring.E0
+                        energy_change[ind] = Vtot / self.ring.E0
     
                         self.beam_phasor -= 2*charge_per_mp*self.loss_factor*mp_per_bin
                         self.phasor_decay(bin_length, ref_frame="beam")
@@ -321,34 +321,34 @@ class CavityResonator():
             self.beam_phasor_record[index] = self.beam_phasor
             
             # phasor decay to be at t=0 of the next bunch
-            self.phasor_decay(ring.T1, ref_frame="beam")
+            self.phasor_decay(self.ring.T1, ref_frame="beam")
                 
         self.nturn += 1
                 
            
     def phasor_decay(self, time, ref_frame="beam"):
         """
-        Compute the beam phasor decay during a given time span, assuming that 
-        no particles are crossing the cavity during the time span.
+        Compute the beam phasor decay duself.ring a given time span, assuming that 
+        no particles are crossing the cavity duself.ring the time span.
 
         Parameters
         ----------
         time : float
             Time span in [s], can be positive or negative.
-        ref_frame : string, optional
+        ref_frame : stself.ring, optional
             Reference frame to be used, can be "beam" or "rf".
 
         """
         if ref_frame == "beam":
             delta = self.wr
         elif ref_frame == "rf":
-            delta = (self.wr - self.m*ring.omega1)
+            delta = (self.wr - self.m*self.ring.omega1)
         self.beam_phasor = self.beam_phasor * np.exp((-1/self.filling_time +
                                   1j*delta)*time)
         
     def phasor_evol(self, profile, bin_length, charge_per_mp, ref_frame="beam"):
         """
-        Compute the beam phasor evolution during the crossing of a bunch using 
+        Compute the beam phasor evolution duself.ring the crossing of a bunch using 
         an analytic formula [1].
         
         Assume that the phasor decay happens before the beam loading.
@@ -361,7 +361,7 @@ class CavityResonator():
             Length of a bin in [s].
         charge_per_mp : float
             Charge per macro-particle in [C].
-        ref_frame : string, optional
+        ref_frame : stself.ring, optional
             Reference frame to be used, can be "beam" or "rf".
             
         References
@@ -372,11 +372,11 @@ class CavityResonator():
         if ref_frame == "beam":
             delta = self.wr
         elif ref_frame == "rf":
-            delta = (self.wr - self.m*ring.omega1)
+            delta = (self.wr - self.m*self.ring.omega1)
             
         n_bin = len(profile)
         
-        # Phasor decay during crossing time
+        # Phasor decay duself.ring crossing time
         deltaT = n_bin*bin_length
         self.phasor_decay(deltaT, ref_frame)
         
@@ -410,14 +410,14 @@ class CavityResonator():
             self.init_tracking(beam)
         
         N = self.n_bin - 1
-        delta = (self.wr - self.m*ring.omega1)
-        n_turn = int(self.filling_time/ring.T0*10)
+        delta = (self.wr - self.m*self.ring.omega1)
+        n_turn = int(self.filling_time/self.ring.T0*10)
         
-        T = np.ones(ring.h)*ring.T1
-        bin_length = np.zeros(ring.h)
-        charge_per_mp = np.zeros(ring.h)
-        profile = np.zeros((N, ring.h))
-        center = np.zeros((N, ring.h))
+        T = np.ones(self.ring.h)*self.ring.T1
+        bin_length = np.zeros(self.ring.h)
+        charge_per_mp = np.zeros(self.ring.h)
+        profile = np.zeros((N, self.ring.h))
+        center = np.zeros((N, self.ring.h))
         
         # Gather beam distribution data
         for j, bunch in enumerate(beam.not_empty):
@@ -435,13 +435,13 @@ class CavityResonator():
             T[index] -= (center[-1, index] + bin_length[index]/2)
             if index != 0:
                 T[index - 1] += (center[0, index] - bin_length[index]/2)
-        T[ring.h - 1] += (center[0, 0] - bin_length[0]/2)
+        T[self.ring.h - 1] += (center[0, 0] - bin_length[0]/2)
 
         # Compute matrix coefficients
         k = np.arange(0, N)
-        Tkj = np.zeros((N, ring.h))
-        for j in range(ring.h):
-            sum_t = np.array([T[n] + N*bin_length[n] for n in range(j+1,ring.h)])
+        Tkj = np.zeros((N, self.ring.h))
+        for j in range(self.ring.h):
+            sum_t = np.array([T[n] + N*bin_length[n] for n in range(j+1,self.ring.h)])
             Tkj[:,j] = (N-k)*bin_length[j] + T[j] + np.sum(sum_t)
             
         var = np.exp( (-1/self.filling_time + 1j*delta) * Tkj )
@@ -449,9 +449,9 @@ class CavityResonator():
         
         # Use the formula n_turn times
         for i in range(n_turn):
-            # Phasor decay during one turn
-            self.phasor_decay(ring.T0, ref_frame="rf")
-            # Phasor evolution due to induced voltage by marco-particles during one turn
+            # Phasor decay duself.ring one turn
+            self.phasor_decay(self.ring.T0, ref_frame="rf")
+            # Phasor evolution due to induced voltage by marco-particles duself.ring one turn
             sum_val = -2 * sum_tot * self.loss_factor
             self.beam_phasor += sum_val
         
@@ -577,10 +577,10 @@ class CavityResonator():
     @detune.setter
     def detune(self, value):
         self._detune = value
-        self._fr = self.detune + self.m*ring.f1
+        self._fr = self.detune + self.m*self.ring.f1
         self._wr = self.fr*2*np.pi
-        self._psi = np.arctan(self.QL*(self.fr/(self.m*ring.f1) -
-                                       (self.m*ring.f1)/self.fr))
+        self._psi = np.arctan(self.QL*(self.fr/(self.m*self.ring.f1) -
+                                       (self.m*self.ring.f1)/self.fr))
 
     @property
     def fr(self):
@@ -589,7 +589,7 @@ class CavityResonator():
 
     @fr.setter
     def fr(self, value):
-        self.detune = value - self.m*ring.f1
+        self.detune = value - self.m*self.ring.f1
 
     @property
     def wr(self):
@@ -598,7 +598,7 @@ class CavityResonator():
 
     @wr.setter
     def wr(self, value):
-        self.detune = (value - self.m*ring.f1)*2*np.pi
+        self.detune = (value - self.m*self.ring.f1)*2*np.pi
 
     @property
     def psi(self):
@@ -607,9 +607,9 @@ class CavityResonator():
 
     @psi.setter
     def psi(self, value):
-        delta = (ring.f1*self.m*np.tan(value)/self.QL)**2 + 4*(ring.f1*self.m)**2
-        fr = (ring.f1*self.m*np.tan(value)/self.QL + np.sqrt(delta))/2
-        self.detune = fr - self.m*ring.f1
+        delta = (self.ring.f1*self.m*np.tan(value)/self.QL)**2 + 4*(self.ring.f1*self.m)**2
+        fr = (self.ring.f1*self.m*np.tan(value)/self.QL + np.sqrt(delta))/2
+        self.detune = fr - self.m*self.ring.f1
         
     @property
     def filling_time(self):
@@ -834,19 +834,19 @@ class CavityResonator():
         
     def VRF(self, z, I0, F = 1, PHI = 0):
         """Total RF voltage taking into account form factor amplitude F and form factor phase PHI"""
-        return self.Vg*np.cos(ring.k1*self.m*z + self.theta_g) - self.Vb(I0)*F*np.cos(ring.k1*self.m*z + self.psi - PHI)
+        return self.Vg*np.cos(self.ring.k1*self.m*z + self.theta_g) - self.Vb(I0)*F*np.cos(self.ring.k1*self.m*z + self.psi - PHI)
     
     def dVRF(self, z, I0, F = 1, PHI = 0):
         """Return derivative of total RF voltage taking into account form factor amplitude F and form factor phase PHI"""
-        return -1*self.Vg*ring.k1*self.m*np.sin(ring.k1*self.m*z + self.theta_g) + self.Vb(I0)*F*ring.k1*self.m*np.sin(ring.k1*self.m*z + self.psi - PHI)
+        return -1*self.Vg*self.ring.k1*self.m*np.sin(self.ring.k1*self.m*z + self.theta_g) + self.Vb(I0)*F*self.ring.k1*self.m*np.sin(self.ring.k1*self.m*z + self.psi - PHI)
     
     def ddVRF(self, z, I0, F = 1, PHI = 0):
         """Return the second derivative of total RF voltage taking into account form factor amplitude F and form factor phase PHI"""
-        return -1*self.Vg*(ring.k1*self.m)**2*np.cos(ring.k1*self.m*z + self.theta_g) + self.Vb(I0)*F*(ring.k1*self.m)**2*np.cos(ring.k1*self.m*z + self.psi - PHI)
+        return -1*self.Vg*(self.ring.k1*self.m)**2*np.cos(self.ring.k1*self.m*z + self.theta_g) + self.Vb(I0)*F*(self.ring.k1*self.m)**2*np.cos(self.ring.k1*self.m*z + self.psi - PHI)
         
     def deltaVRF(self, z, I0, F = 1, PHI = 0):
         """Return the generator voltage minus beam loading voltage taking into account form factor amplitude F and form factor phase PHI"""
-        return -1*self.Vg*(ring.k1*self.m)**2*np.cos(ring.k1*self.m*z + self.theta_g) - self.Vb(I0)*F*(ring.k1*self.m)**2*np.cos(ring.k1*self.m*z + self.psi - PHI)
+        return -1*self.Vg*(self.ring.k1*self.m)**2*np.cos(self.ring.k1*self.m*z + self.theta_g) - self.Vb(I0)*F*(self.ring.k1*self.m)**2*np.cos(self.ring.k1*self.m*z + self.psi - PHI)
 
     def to_gpu(self, recursive=True):
         '''

@@ -30,9 +30,9 @@ class Synchrotron:
     emit : array of shape (2,)
         Horizontal and vertical equilibrium emittance in [m.rad].
     L : float, optional
-        Ring circumference in [m].
+        self.ring circumference in [m].
     E0 : float, optional
-        Nominal (total) energy of the ring in [eV].
+        Nominal (total) energy of the self.ring in [eV].
     ac : float, optional
         Momentum compaction factor.
     tune : array of shape (2,), optional
@@ -99,8 +99,8 @@ class Synchrotron:
             self.chro = kwargs.get('chro', self.optics.chro)
             self.U0 = kwargs.get('U0', self.optics.lattice.energy_loss)
         else:
-            self.L = kwargs.get('L') # Ring circumference [m]
-            self.E0 = kwargs.get('E0') # Nominal (total) energy of the ring [eV]
+            self.L = kwargs.get('L') # self.ring circumference [m]
+            self.E0 = kwargs.get('E0') # Nominal (total) energy of the self.ring [eV]
             self.ac = kwargs.get('ac') # Momentum compaction factor
             self.tune = kwargs.get('tune') # X/Y/S tunes
             self.chro = kwargs.get('chro') # X/Y (non-normalized) chromaticities
@@ -124,7 +124,7 @@ class Synchrotron:
         
     @property
     def L(self):
-        """Ring circumference [m]"""
+        """self.ring circumference [m]"""
         return self._L
     
     @L.setter
@@ -223,7 +223,7 @@ class Synchrotron:
         
     @property
     def E0(self):
-        """Nominal (total) energy of the ring [eV]"""
+        """Nominal (total) energy of the self.ring [eV]"""
         return self._E0
     
     @E0.setter
