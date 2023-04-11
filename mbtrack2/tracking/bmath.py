@@ -8,7 +8,7 @@ BLonD math and physics core functions
 import os
 
 import numpy as np
-import butils_wrap
+from mbtrack2.utilities import butils_wrap
 # from ..utils import bphysics_wrap
 
 precision = butils_wrap.precision

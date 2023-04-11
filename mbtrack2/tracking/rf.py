@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.legend_handler import HandlerPatch
 from mbtrack2.tracking.element import Element
-from ..utilities import bmath as bm
+from mbtrack2.utilities import bmath as bm
 
 class RFCavity(Element):
     """
