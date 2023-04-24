@@ -294,14 +294,17 @@ class CavityResonator():
                             continue
                         
                         ind = (sorted_index == i)
-                        #phase = self.m * self.ring.omega1 * (center0 + self.ring.T1* (index + self.ring.h * self.nturn))
-                        #Vgene = self.Vg*np.cos(phase + self.theta_g)
-                        #Vbeam = np.real(self.beam_phasor)
-                        #Vtot = Vgene + Vbeam - charge_per_mp*self.loss_factor*mp_per_bin 
-                        phase = self.m * self.ring.omega1 * center0                                               
-                        Vcav = self.Vc*np.cos(phase + self.theta)                        
+                        phase = self.m * self.ring.omega1 * (center0 + self.ring.T1* (index + self.ring.h * self.nturn))
+                        Vgene = self.Vg*np.cos(phase + self.theta_g)
                         Vbeam = np.real(self.beam_phasor)
-                        Vtot = Vcav + Vbeam - charge_per_mp*self.loss_factor*mp_per_bin
+                        Vtot = Vgene + Vbeam - charge_per_mp*self.loss_factor*mp_per_bin 
+                        
+                        # omega1 = 7560 * omega0
+                        # ring.T1 = ring.T0/7560
+                        #phase = self.m * self.wr * (center0 + self.ring.T1* (index))                                              
+                        #Vcav = self.Vc*np.cos(phase + self.theta)                        
+                        #Vbeam = np.real(self.beam_phasor)
+                        #Vtot = Vcav + Vbeam - charge_per_mp*self.loss_factor*mp_per_bin
                         energy_change[ind] = Vtot / self.ring.E0
     
                         self.beam_phasor -= 2*charge_per_mp*self.loss_factor*mp_per_bin

@@ -555,9 +555,9 @@ class Beam:
             other bunches are initialized with a single marco-particle.
         """
         
-        if (len(filling_pattern) != self.ring.h):
-            raise ValueError(("The length of filling pattern is {} ".format(len(filling_pattern)) + 
-                              "but should be {}".format(self.ring.h)))
+        #if (len(filling_pattern) != self.ring.h):
+        #    raise ValueError(("The length of filling pattern is {} ".format(len(filling_pattern)) + 
+        #                      "but should be {}".format(self.ring.h)))
         
         if mpi is True:
             mp_per_bunch_mpi = mp_per_bunch
