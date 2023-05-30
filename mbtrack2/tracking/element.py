@@ -9,6 +9,7 @@ import numpy as np
 from abc import ABCMeta, abstractmethod
 from functools import wraps
 from mbtrack2.tracking.particles import Beam
+from mbtrack2.utilities import bmath as bm
 
 class Element(metaclass=ABCMeta):
     """
@@ -92,6 +93,35 @@ class LongitudinalMap(Element):
         bunch["delta"] -= self.ring.U0 / self.ring.E0
         bunch["tau"] += self.ring.ac * self.ring.T0 * bunch["delta"]
 
+    def to_gpu(self, recursive=True):
+        '''
+        Transfer all necessary arrays to the GPU
+        '''
+        # Check if to_gpu has been invoked already
+        if hasattr(self, '_device') and self._device == 'GPU':
+            return
+
+        assert bm.device == 'GPU'
+        import cupy as cp
+        bunch = cp.asarray(bunch)
+
+        # to make sure it will not be called again
+        self._device = 'GPU'
+
+    def to_cpu(self, recursive=True):
+        '''
+        Transfer all necessary arrays back to the CPU
+        '''
+        # Check if to_cpu has been invoked already
+        if hasattr(self, '_device') and self._device == 'CPU':
+            return
+
+        assert bm.device == 'CPU'
+        import cupy as cp
+        bunch = cp.asnumpy(bunch)
+
+        self._device = 'CPU'
+  
 class SynchrotronRadiation(Element):
     """
     Element to handle synchrotron radiation, radiation damping and quantum 
@@ -133,7 +163,38 @@ class SynchrotronRadiation(Element):
             rand = np.random.normal(size=len(bunch))
             bunch["yp"] = ((1 - 2*self.ring.T0/self.ring.tau[1])*bunch["yp"] +
                  2*self.ring.sigma()[3]*(self.ring.T0/self.ring.tau[1])**0.5*rand)
+
+    def to_gpu(self, recursive=True):
+        '''
+        Transfer all necessary arrays to the GPU
+        '''
+        # Check if to_gpu has been invoked already
+        if hasattr(self, '_device') and self._device == 'GPU':
+            return
+
+        assert bm.device == 'GPU'
+        import cupy as cp
+        bunch = cp.asarray(bunch)
+        self.switch = cp.asarray(self.switch)
         
+
+        # to make sure it will not be called again
+        self._device = 'GPU'
+
+    def to_cpu(self, recursive=True):
+        '''
+        Transfer all necessary arrays back to the CPU
+        '''
+        # Check if to_cpu has been invoked already
+        if hasattr(self, '_device') and self._device == 'CPU':
+            return
+
+        assert bm.device == 'CPU'
+        import cupy as cp
+        bunch = cp.asnumpy(bunch)
+
+        self._device = 'CPU'
+         
 class TransverseMap(Element):
     """
     Transverse map for a single turn in the synchrotron.
@@ -144,7 +205,7 @@ class TransverseMap(Element):
     """
     
     def __init__(self, ring):
-        self.ring = ring
+        self.ring = self.ring
         self.alpha = self.ring.optics.local_alpha
         self.beta = self.ring.optics.local_beta
         self.gamma = self.ring.optics.local_gamma

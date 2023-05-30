@@ -5,6 +5,7 @@ Module where the Synchrotron class is defined.
 
 import numpy as np
 from scipy.constants import c, e
+from mbtrack2.utilities import bmath as bm
         
 class Synchrotron:
     """
@@ -296,3 +297,72 @@ class Synchrotron:
         tuneS = np.sqrt( - (Vrf / self.E0) * (self.h * self.ac) / (2*np.pi) 
                         * np.cos(phase) )
         return tuneS
+
+
+    def to_gpu(self, recursive=True):
+        '''
+        Transfer all necessary arrays to the GPU
+        '''
+        # Check if to_gpu has been invoked already
+        if hasattr(self, '_device') and self._device == 'GPU':
+            return
+
+        assert bm.device == 'GPU'
+        import cupy as cp
+        
+      
+        self.h = cp.asarray(self.h)
+        self.L = cp.asarray(self.L)
+        self.T0 = cp.asarray(self.T0)
+        self.T1 = cp.asarray(self.T1)
+        self.f0 = cp.asarray(self.f0)
+        self.f1 = cp.asarray(self.f1)        
+        self.omega1 = cp.asarray(self.omega1)
+        self.k1 = cp.asarray(self.k1)        
+        self.gamma = cp.asarray(self.gamma)  
+        self.beta = cp.asarray(self.beta)         
+        self.E0 = cp.asarray(self.E0)
+        self.ac = cp.asarray(self.ac)
+        
+        self.tune = cp.asarray(self.tune)
+        self.chro = cp.asarray(self.chro)
+        self.U0 = cp.asarray(self.U0)
+        self.tau = cp.asarray(self.tau)
+        self.sigma_delta = cp.asarray(self.sigma_delta)
+        self.sigma_0 = cp.asarray(self.sigma_0)
+        self.emit = cp.asarray(self.emit)
+        self.adts = cp.asarray(self.adts)
+
+        # to make sure it will not be called again
+        self._device = 'GPU'
+
+    def to_cpu(self, recursive=True):
+        '''
+        Transfer all necessary arrays back to the CPU
+        '''
+        # Check if to_cpu has been invoked already
+        if hasattr(self, '_device') and self._device == 'CPU':
+            return
+
+        assert bm.device == 'CPU'
+        import cupy as cp
+        self.induced_voltage = cp.asnumpy(self.induced_voltage)
+        self.time = cp.asnumpy(self.time)
+        self.total_wake = cp.asnumpy(self.total_wake)
+        self.total_impedance = cp.asnumpy(self.total_impedance)
+        if hasattr(self, 'mtw_memory'):
+            self.mtw_memory = cp.asnumpy(self.mtw_memory)
+        if hasattr(self, 'time_mtw'):
+            self.time_mtw = cp.asnumpy(self.time_mtw)
+        if hasattr(self, 'omegaj_mtw'):
+            self.omegaj_mtw = cp.asnumpy(self.omegaj_mtw)
+        if hasattr(self, 'freq_mtw'):
+            self.freq_mtw = cp.asnumpy(self.freq_mtw)
+        if hasattr(self, 'total_wake'):
+            self.total_wake = cp.asnumpy(self.total_wake)
+        if hasattr(self, 'time'):
+            self.time = cp.asnumpy(self.time)
+
+        # to make sure it will not be called again
+        self._device = 'CPU'
+  

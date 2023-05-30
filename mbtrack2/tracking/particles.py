@@ -808,4 +808,35 @@ class Beam:
        
         return fig
         
-    
+    def to_gpu(self, recursive=True):
+        '''
+        Transfer all necessary arrays to the GPU
+        '''
+        # Check if to_gpu has been invoked already
+        if hasattr(self, '_device') and self._device == 'GPU':
+            return
+
+        assert bm.device == 'GPU'
+        import cupy as cp
+        self.bunch_list = cp.asarray(self.bunch_list)
+        self.filling_pattern = cp.asarray(self.filling_pattern)
+        self.distance_between_bunches = cp.asarray(self.distance_between_bunches)
+
+        self._device = 'GPU'
+
+    def to_cpu(self, recursive=True):
+        '''
+        Transfer all necessary arrays back to the CPU
+        '''
+        # Check if to_cpu has been invoked already
+        if hasattr(self, '_device') and self._device == 'CPU':
+            return
+
+        assert bm.device == 'CPU'
+        import cupy as cp
+        self.dE = cp.asnumpy(self.dE)
+        self.dt = cp.asnumpy(self.dt)
+        self.id = cp.asnumpy(self.id)
+
+        # to make sure it will not be called again
+        self._device = 'CPU'
